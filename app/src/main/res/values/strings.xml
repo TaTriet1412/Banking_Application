@@ -1,0 +1,23 @@
+<resources>
+    <string name="app_name">3T Banking</string>
+
+    <string name="email">E-mail</string>
+    <string name="login">Đăng nhập</string>
+    <string name="login_btn">Đăng nhập</string>
+    <string name="pass">Mật khẩu</string>
+
+    <!-- Error   -->
+    <string name="email_pass_wrong">E-mail hoặc mật khẩu không chính xác</string>
+    <string name="email_not_exist">Tài khoản không tồn tại</string>
+    <string name="email_empty">Vui lòng nhập e-mail</string>
+    <string name="email_wrong_format">E-mail không đúng định dạng</string>
+    <string name="register_btn">Đăng ký</string>
+    <string name="birthday">Ngày sinh</string>
+    <string name="phone">Số điện thoại</string>
+    <string name="confirm_password">Xác nhận mật khẩu</string>
+    <string name="nation_id">Số CCCD</string>
+    <string name="gender">Giới tính</string>
+    <string name="create_account">Tạo tài khoản</string>
+    <string name="card_back">Mặc sau CCCD</string>
+    <string name="card_front">Mặc trước CCCD</string>
+</resources>

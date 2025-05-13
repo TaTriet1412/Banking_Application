@@ -1,0 +1,229 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+    <androidx.core.widget.NestedScrollView
+
+        android:id="@+id/main"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:paddingHorizontal="@dimen/app_padding_horizontal"
+        android:paddingTop="@dimen/app_padding_vertical"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        tools:context=".SignUpActivity"
+        >
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingTop="@dimen/app_padding_vertical"
+            android:orientation="vertical">
+
+            <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/imgBack"
+                android:layout_width="@dimen/default_back_btn_dimens"
+                android:layout_height="@dimen/default_back_btn_dimens"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.0"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintVertical_bias="0.0"
+                app:srcCompat="@mipmap/ic_back"/>
+
+            <com.google.android.material.imageview.ShapeableImageView
+                android:id="@+id/imgAvatar"
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                android:layout_gravity="center"
+                android:layout_marginBottom="20dp"
+                android:scaleType="centerCrop"
+                android:src="@drawable/ic_avatar"
+                app:shapeAppearance="@style/Circle" />
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:hintEnabled="false"
+                app:expandedHintEnabled="false">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    style="@style/InfoEditText"
+                    android:id="@+id/edtDisplayName"
+                    android:inputType="text"
+                    android:hint="Họ và tên"/>
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/edittext_distance"
+                app:hintEnabled="false"
+                app:expandedHintEnabled="false">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    style="@style/InfoEditText"
+                    android:id="@+id/edtNationId"
+                    android:inputType="number"
+                    android:hint="@string/nation_id"/>
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <AutoCompleteTextView
+                style="@style/InfoEditText"
+                android:focusable="false"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/edittext_distance"
+                android:id="@+id/autoGender"
+                android:inputType="text"
+                android:hint="@string/gender"/>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/edittext_distance"
+                app:hintEnabled="false"
+                app:expandedHintEnabled="false">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    style="@style/InfoEditText"
+                    android:id="@+id/edtBirthday"
+                    android:inputType="none"
+                    android:focusable="false"
+                    android:hint="@string/birthday"/>
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/edittext_distance"
+                app:hintEnabled="false"
+                app:expandedHintEnabled="false">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    style="@style/InfoEditText"
+                    android:id="@+id/edtEmail"
+                    android:inputType="textEmailAddress"
+                    android:hint="@string/email"/>
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/edittext_distance"
+                app:hintEnabled="false"
+                app:expandedHintEnabled="false">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    style="@style/InfoEditText"
+                    android:id="@+id/edtPhoneNumber"
+                    android:inputType="number"
+                    android:hint="@string/phone"/>
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/edittext_distance"
+                app:hintEnabled="false"
+                app:expandedHintEnabled="false">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    style="@style/InfoEditText"
+                    android:id="@+id/edtAddress"
+                    android:inputType="text"
+                    android:hint="Địa chỉ"/>
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/edittext_distance"
+                app:hintEnabled="false"
+                app:passwordToggleEnabled="true"
+                app:startIconDrawable="@drawable/vector"
+                app:expandedHintEnabled="false">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    style="@style/InfoEditText"
+                    android:id="@+id/edtPassword"
+                    android:inputType="textPassword"
+                    android:hint="@string/pass"/>
+            </com.google.android.material.textfield.TextInputLayout>
+
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/edittext_distance"
+                app:hintEnabled="false"
+                app:passwordToggleEnabled="true"
+                app:startIconDrawable="@drawable/vector"
+                app:expandedHintEnabled="false">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    style="@style/InfoEditText"
+                    android:id="@+id/edtConfirmPassword"
+                    android:inputType="textPassword"
+                    android:hint="@string/confirm_password"/>
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <TextView
+                android:id="@+id/lblCardFront"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/card_front"
+                android:textColor="@color/black"
+                android:layout_marginTop="8dp"
+                android:textSize="16sp"
+                android:gravity="center" />
+
+
+            <com.google.android.material.imageview.ShapeableImageView
+                android:id="@+id/imgCardFront"
+                android:layout_width="match_parent"
+                android:layout_height="200dp"
+                android:layout_marginTop="@dimen/edittext_distance"
+                android:layout_marginBottom="@dimen/img_null_margin_bottom"
+                android:layout_gravity="center"
+                android:src="@drawable/ic_image_null"
+                android:scaleType="centerCrop"
+                app:shapeAppearanceOverlay="@style/Rounded13"/>
+
+            <TextView
+                android:id="@+id/lblCardBack"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/card_back"
+                android:textColor="@color/black"
+                android:layout_marginTop="8dp"
+                android:textSize="16sp"
+                android:gravity="center" />
+
+            <com.google.android.material.imageview.ShapeableImageView
+                android:id="@+id/imgCardBack"
+                android:layout_width="match_parent"
+                android:layout_height="200dp"
+                android:layout_marginTop="@dimen/edittext_distance"
+                android:layout_marginBottom="@dimen/img_null_margin_bottom"
+                android:layout_gravity="center"
+                android:src="@drawable/ic_image_null"
+                android:scaleType="centerCrop"
+                app:shapeAppearanceOverlay="@style/Rounded13"/>
+
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/btnAddAccount"
+                style="@style/Button"
+                android:layout_marginTop="30dp"
+                android:layout_marginBottom="@dimen/fragment_last_item_margin_bottom"
+                android:text="@string/create_account" />
+
+
+        </LinearLayout>
+
+    </androidx.core.widget.NestedScrollView>
+    <include layout="@layout/progress_overlay"/>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
