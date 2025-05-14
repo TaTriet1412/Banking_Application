@@ -39,6 +39,26 @@ public class User implements Serializable {
         this.biometricData = biometricData;
     }
 
+    public User(String UID, String name, String email, String phone, String address, String nationalId,
+                String role, Boolean gender, Timestamp dateOfBirth, Timestamp kycDate) {
+        this.UID = UID;
+        this.name = name;
+        this.email = email;
+        this.phone = phone;
+        this.address = address;
+        this.nationalId = nationalId;
+        this.role = role;
+        this.gender = gender;
+        this.dateOfBirth = dateOfBirth;
+        this.kycDate = kycDate;
+    }
+
+    public User(String email, String phone, String nationalId) {
+        this.email = email;
+        this.phone = phone;
+        this.nationalId = nationalId;
+    }
+
     public String getUID() {
         return UID;
     }
