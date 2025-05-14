@@ -20,4 +20,8 @@
     <string name="create_account">Tạo tài khoản</string>
     <string name="card_back">Mặc sau CCCD</string>
     <string name="card_front">Mặc trước CCCD</string>
+
+<!--    Gender-->
+    <string name="male">Nam</string>
+    <string name="female">Nữ</string>
 </resources>

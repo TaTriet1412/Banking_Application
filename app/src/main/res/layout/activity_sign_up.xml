@@ -65,7 +65,7 @@
 
                 <com.google.android.material.textfield.TextInputEditText
                     style="@style/InfoEditText"
-                    android:id="@+id/edtNationId"
+                    android:id="@+id/edtNationalId"
                     android:inputType="number"
                     android:hint="@string/nation_id"/>
             </com.google.android.material.textfield.TextInputLayout>

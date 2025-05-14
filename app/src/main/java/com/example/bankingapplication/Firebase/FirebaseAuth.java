@@ -52,28 +52,39 @@ public class FirebaseAuth {
     }
 
     // phương thức đăng ký tài khoản mới với firebase sử dụng email và password
-    public static Task<Boolean> signUp(String username, String password){
-        // Ném ra exception FirebaseAuthWeakPasswordException nếu password quá yếu (dưới 6 ký tự)
-        // Ném ra exception FirebaseAuthInvalidCredentialsException nếu email sai định dạng
-        // Ném ra exception FirebaseAuthUserCollisionException nếu email đã tồn tại
+    public static Task<String> signUp(String username, String password) {
+        // Tạo TaskCompletionSource để trả về kết quả
+        TaskCompletionSource<String> taskCompletionSource = new TaskCompletionSource<>();
 
-        TaskCompletionSource<Boolean> taskCompletionSource = new TaskCompletionSource<>();
+        // Tạo người dùng mới bằng email và mật khẩu
         mAuth.createUserWithEmailAndPassword(username, password)
                 .addOnCompleteListener(task -> {
-                    if(task.isSuccessful()){
-                        // đăng ký thành công
+                    if (task.isSuccessful()) {
+                        // Đăng ký thành công
                         Log.d("signUp", "signUp: success");
-                        currentUser = mAuth.getCurrentUser(); // lấy thông tin người dùng hiện tại
-                        currentUser.reload(); // cập nhật thông tin người dùng từ máy chủ firebase
-                        taskCompletionSource.setResult(true);
+                        FirebaseUser currentUser = mAuth.getCurrentUser(); // Lấy người dùng hiện tại
+                        if (currentUser != null) {
+                            // Lấy UID của người dùng và trả về
+                            String userId = currentUser.getUid();
+                            Log.d("signUp", "User ID: " + userId);
+                            taskCompletionSource.setResult(userId); // Trả về UID
+                        } else {
+                            taskCompletionSource.setException(new Exception("Current user is null"));
+                        }
+                    } else {
+                        // Đăng ký thất bại
+                        taskCompletionSource.setException(task.getException()); // Ném lỗi ra
+                        Log.e("signUp", "signUp: lỗi gì đó", task.getException());
                     }
                 }).addOnFailureListener(e -> {
-                    // lỗi gì đó
-                    Log.e("signUp", "signUp: lỗi gì đó");
-                    taskCompletionSource.setException(e); // ném lỗi ra để bắt ở nơi gọi
+                    // Nếu có lỗi trong quá trình đăng ký
+                    Log.e("signUp", "signUp: lỗi gì đó", e);
+                    taskCompletionSource.setException(e); // Ném lỗi ra
                 });
+
         return taskCompletionSource.getTask();
     }
+
 
     // phương thức đăng nhập tài khoản đã đăng ký với firebase sử dụng email và password
     public static Task<Boolean> signIn(String username, String password){

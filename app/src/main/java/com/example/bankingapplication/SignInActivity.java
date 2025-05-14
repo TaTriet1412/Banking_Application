@@ -15,6 +15,7 @@ import androidx.appcompat.app.AppCompatDelegate;
 import com.example.bankingapplication.Firebase.FirebaseAuth;
 import com.example.bankingapplication.Firebase.Firestore;
 import com.example.bankingapplication.Object.User;
+import com.example.bankingapplication.Utils.AudioEffectUtils;
 import com.example.bankingapplication.Utils.GlobalVariables;
 import com.example.bankingapplication.Utils.SecurePreferencesUtil;
 import com.google.android.material.textfield.TextInputEditText;
@@ -44,6 +45,7 @@ public class SignInActivity extends AppCompatActivity {
         progressOverlay = findViewById(R.id.progress_overlay);
 
         btnSignIn.setOnClickListener(v -> {
+            AudioEffectUtils.clickEffect(this);
             String email = edtEmail.getText().toString().trim();
             String password = edtPassword.getText().toString().trim();
 
@@ -114,6 +116,7 @@ public class SignInActivity extends AppCompatActivity {
         });
 
         btnSignUp.setOnClickListener(v -> {
+            AudioEffectUtils.clickEffect(this);
             Intent intent = new Intent(SignInActivity.this, SignUpActivity.class);
             startActivity(intent);
         });
