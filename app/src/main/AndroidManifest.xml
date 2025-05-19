@@ -25,7 +25,21 @@
         tools:ignore="LockedOrientationActivity"
         tools:targetApi="31">
         <activity
-            android:name=".AccountActivity"
+            android:name=".SignInActivity"
+            android:exported="true" >
+
+        <intent-filter>
+            <action android:name="android.intent.action.MAIN" />
+
+            <category android:name="android.intent.category.LAUNCHER" />
+        </intent-filter>
+        </activity>
+
+        <activity
+            android:name=".RechargePhoneActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ConfirmRechargePhoneActivity"
             android:exported="false" />
         <activity
             android:name=".BankOfficerMainActivity"
@@ -51,13 +65,8 @@
             android:exported="false"
             android:screenOrientation="unspecified" />
         <activity
-            android:name=".SignInActivity"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
+            android:name=".AccountActivity"
+            android:exported="false">
         </activity>
         <activity
             android:name=".CustomerMainActivity"

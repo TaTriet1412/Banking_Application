@@ -22,8 +22,6 @@ public class AccountFragmentAdapter extends FragmentStateAdapter {
     @Override
     public Fragment createFragment(int position) {
         switch (position) {
-            case 0:
-                return new CheckingAccountFragment();
             case 1:
                 return new SavingAccountFragment();
             case 2:

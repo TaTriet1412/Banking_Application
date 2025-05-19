@@ -190,8 +190,6 @@
 
 
             </RelativeLayout>
-            <!-- Dải màu dưới cùng và chữ "Tài khoản mặc định" -->
-            <!-- Cách 1: Dùng một View làm dải màu -->
             <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -201,18 +199,6 @@
                     android:layout_width="match_parent"
                     android:background="@drawable/default_account_strip_bg"
                     android:layout_height="36dp" />
-                <!--
-                res/drawable/default_account_strip_bg.xml:
-                <shape xmlns:android="http://schemas.android.com/apk/res/android"
-                       android:shape="rectangle">
-                    <solid android:color="#CCDDCC" /> // Màu xanh lá nhạt hơn nữa, hoặc gradient
-                    <corners android:bottomLeftRadius="12dp" android:bottomRightRadius="12dp" />
-                </shape>
-                Để chính xác như hình, phần này có thể là một gradient hoặc màu đồng nhất
-                nhưng cần điều chỉnh lại padding của LinearLayout cha để nó chạm đáy CardView.
-                Hoặc, CardView có background gradient.
-                Hiện tại, nó sẽ nằm bên trong padding của card.
-                -->
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -223,28 +209,6 @@
                     android:textStyle="bold"
                     android:layout_centerInParent="true" />
             </RelativeLayout>
-
-            <!-- Hoặc Cách 2: Nếu dải màu là một phần của background CardView (phức tạp hơn với XML thuần)
-                 thì chỉ cần TextView này với margin/padding phù hợp -->
-            <!--
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Tài khoản mặc định"
-                android:background="#D0E0D0" // Màu nền cho dải này
-                android:textColor="@color/default_account_text_color"
-                android:textSize="14sp"
-                android:textStyle="bold"
-                android:gravity="center"
-                android:paddingTop="8dp"
-                android:paddingBottom="8dp"
-                android:layout_marginTop="16dp"
-                android:layout_marginStart="-16dp" // Bù trừ padding của LinearLayout cha
-                android:layout_marginEnd="-16dp"   // để nó full width card
-                android:layout_marginBottom="-8dp" // Bù trừ padding của LinearLayout cha
-                />
-            -->
-
         </LinearLayout>
     </androidx.cardview.widget.CardView>
 

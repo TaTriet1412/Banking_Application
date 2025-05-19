@@ -16,6 +16,4 @@ public class NumberFormat {
         java.text.NumberFormat nf = java.text.NumberFormat.getNumberInstance(new java.util.Locale("vi", "VN"));
         return nf.format(amount);
     }
-
-
 }

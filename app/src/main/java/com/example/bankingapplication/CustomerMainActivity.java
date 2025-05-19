@@ -61,6 +61,7 @@ public class CustomerMainActivity extends AppCompatActivity {
         toggleBalanceClick();
         copyAccountNumberClick();
         accountClick();
+        phoneClick();
     }
 
     @SuppressLint("SetTextI18n")
@@ -73,6 +74,14 @@ public class CustomerMainActivity extends AppCompatActivity {
                 tv_balance.setText(R.string.pass_hint);
                 iv_toggle_balance.setImageResource(R.drawable.ic_eye);
             }
+        });
+    }
+
+    private void phoneClick() {
+        iv_charge_phone.setOnClickListener(v -> {
+            // Handle phone charge click
+            Intent intent = new Intent(this, RechargePhoneActivity.class);
+            startActivity(intent);
         });
     }
 
