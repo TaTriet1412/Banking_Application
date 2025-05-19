@@ -1,6 +1,7 @@
 package com.example.bankingapplication;
 
 import android.annotation.SuppressLint;
+import android.content.Intent;
 import android.os.Bundle;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
@@ -59,13 +60,14 @@ public class CustomerMainActivity extends AppCompatActivity {
     private void initClickListeners() {
         toggleBalanceClick();
         copyAccountNumberClick();
+        accountClick();
     }
 
     @SuppressLint("SetTextI18n")
     private void toggleBalanceClick() {
         iv_toggle_balance.setOnClickListener(v -> {
             if (tv_balance.getText().toString().contains("*")) {
-                tv_balance.setText(NumberFormat.convertToCurrencyFormat(currentAccount.getChecking().getBalance()));
+                tv_balance.setText(NumberFormat.convertToCurrencyFormatHasUnit(currentAccount.getChecking().getBalance()));
                 iv_toggle_balance.setImageResource(R.drawable.ic_un_eye);
             } else {
                 tv_balance.setText(R.string.pass_hint);
@@ -83,6 +85,14 @@ public class CustomerMainActivity extends AppCompatActivity {
             clipboard.setPrimaryClip(clip);
             // Show a message to the user
             Toast.makeText(this, "Đã sao chép số tài khoản", Toast.LENGTH_SHORT).show();
+        });
+    }
+
+    private void accountClick() {
+        ll_account.setOnClickListener(v -> {
+            // Handle account click
+            Intent intent = new Intent(this, AccountActivity.class);
+            startActivity(intent);
         });
     }
 }

@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/window_background_color"
+    android:fitsSystemWindows="true"
+    android:orientation="vertical">
+    <!-- Bạn có thể định nghĩa @color/window_background_color trong colors.xml, ví dụ #F5F5F5 -->
+
+    <!-- AppBarLayout để chứa Toolbar và TabLayout -->
+    <com.google.android.material.appbar.AppBarLayout
+        android:id="@+id/appBarLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
+        <!-- theme này giúp text và icon trên AppBar có màu sáng nếu AppBar nền tối -->
+
+        <!-- Toolbar hoạt động như ActionBar, chứa nút Back và tiêu đề -->
+        <androidx.appcompat.widget.Toolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:background="@color/green_primary"
+            app:navigationIcon="@drawable/ic_arrow_back_white_24dp"
+            app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
+            app:title="Tài Khoản Của Tôi"
+            app:titleTextColor="@android:color/white" />
+        <!-- Thay @drawable/ic_arrow_back_white_24dp bằng icon bạn đã tạo -->
+
+        <!-- TabLayout cho các mục Saving, Checking, Mortgage -->
+        <com.google.android.material.tabs.TabLayout
+            android:id="@+id/tabLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/green_secondary"
+            app:tabGravity="fill"
+            app:tabIndicatorColor="@android:color/white"
+            app:tabMode="fixed"
+            app:tabSelectedTextColor="@android:color/white"
+            app:tabTextColor="#B3FFFFFF">
+        </com.google.android.material.tabs.TabLayout>
+
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <!-- Chỗ để Fragment Layout -->
+    <!-- Thông thường, bạn sẽ dùng ViewPager2 ở đây để swipe giữa các fragment tương ứng với các tab -->
+    <androidx.viewpager2.widget.ViewPager2
+        android:id="@+id/viewPager"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:padding="16dp" />
+</LinearLayout>

@@ -9,6 +9,18 @@
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
     <!--    Custom generic color    -->
+    <color name="tab_text_color_unselected">#555555</color>
+    <color name="tab_text_color_selected">#FFFFFF</color>
+    <color name="tab_selected_green">#4CAF50</color>
+    <color name="green_dark">#006938</color>
+    <color name="green_light_card_bg">#E6F5EA</color>
+    <color name="text_grey_label">#757575</color>
+    <color name="text_dark">#212121</color>
+    <color name="default_account_text_color">#004D24</color>
+    <color name="green_abstract_shape">#38A85E</color>
+    <color name="divider_color">#E0E0E0</color>
+    <color name="green_primary">#4CAF50</color>
+    <color name="green_secondary">#388E3C</color>
     <color name="primary">#67EB4F</color>
     <color name="secondary">#FCCD2A</color>
     <color name="faills">#F5004F</color>
@@ -26,4 +38,5 @@
     <color name="gray_600">#FF757575</color>
     <color name="green_gradient_start">#4CAF50</color>
     <color name="green_gradient_end">#2E7D32</color>
+    <color name="window_background_color">#F0F4F7</color>
 </resources>
