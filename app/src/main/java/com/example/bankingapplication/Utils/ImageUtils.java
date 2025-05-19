@@ -34,19 +34,16 @@ public class ImageUtils {
     // Update field URL to Firestore
 
     private static void updateImageURLToFirestore(String fieldName, String collectionName, String document, String fileName, ImageUploadCallback callback) {
-        Firestore.updateImgUrlForDocument(fieldName,collectionName,document, fileName, new Firestore.FirestoreAddCallback() {
-            @Override
-            public void onCallback(boolean isSuccess) {
-                if (isSuccess) {
-                    // Cập nhật ảnh thành công
-                    if (callback != null) {
-                        callback.onSuccess(fileName);
-                    }
-                } else {
-                    // Nếu cập nhật Firestore thất bại
-                    if (callback != null) {
-                        callback.onFailure("Cập nhật ảnh vào Firestore thất bại");
-                    }
+        Firestore.updateImgUrlForDocument(fieldName,collectionName,document, fileName, isSuccess -> {
+            if (isSuccess) {
+                // Cập nhật ảnh thành công
+                if (callback != null) {
+                    callback.onSuccess(fileName);
+                }
+            } else {
+                // Nếu cập nhật Firestore thất bại
+                if (callback != null) {
+                    callback.onFailure("Cập nhật ảnh vào Firestore thất bại");
                 }
             }
         });

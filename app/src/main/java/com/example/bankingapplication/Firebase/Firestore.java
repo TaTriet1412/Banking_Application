@@ -4,9 +4,11 @@ import android.util.Log;
 
 import androidx.annotation.NonNull;
 
+import com.example.bankingapplication.Object.Account;
 import com.example.bankingapplication.Object.User;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
@@ -50,23 +52,60 @@ public class Firestore {
 
 
     public static void updateImgUrlForDocument(String fieldUrlName, String collectionName, String document, String imgUrl, FirestoreAddCallback callback) {
-        Map<String, Object> data;
+        // Get document reference
+        DocumentReference docRef = db.collection(collectionName).document(document);
 
         if (fieldUrlName.contains(".")) {
-            // Trường hợp field lồng nhau: bioData.faceUrl
+            // Handle nested fields
             String[] keys = fieldUrlName.split("\\.");
-            data = buildNestedMap(keys, imgUrl);
+            String parentField = keys[0];
+            String childField = keys[1];
+
+            // First get the current document
+            docRef.get().addOnCompleteListener(task -> {
+                if (task.isSuccessful() && task.getResult() != null) {
+                    DocumentSnapshot documentSnapshot = task.getResult();
+                    Map<String, Object> updateData = new HashMap<>();
+
+                    // Get existing parent map or create new one
+                    Map<String, Object> parentMap = new HashMap<>();
+                    if (documentSnapshot.exists() && documentSnapshot.contains(parentField)) {
+                        Object existingData = documentSnapshot.get(parentField);
+                        if (existingData instanceof Map) {
+                            // Cast and preserve all existing fields
+                            parentMap = new HashMap<>((Map<String, Object>) existingData);
+                        }
+                    }
+
+                    // Add/update the specific field within the parent map
+                    parentMap.put(childField, imgUrl);
+
+                    // Prepare the update data
+                    updateData.put(parentField, parentMap);
+
+                    // Update document
+                    docRef.update(updateData)
+                            .addOnSuccessListener(aVoid -> callback.onCallback(true))
+                            .addOnFailureListener(e -> {
+                                System.out.println("Error updating document: " + e.getMessage());
+                                callback.onCallback(false);
+                            });
+                } else {
+                    System.out.println("Error getting document: " +
+                            (task.getException() != null ? task.getException().getMessage() : "Unknown error"));
+                    callback.onCallback(false);
+                }
+            });
         } else {
-            // Trường hợp field đơn
-            data = new HashMap<>();
+            // Simple field update (no nested fields)
+            Map<String, Object> data = new HashMap<>();
             data.put(fieldUrlName, imgUrl);
+
+            docRef.update(data)
+                    .addOnSuccessListener(aVoid -> callback.onCallback(true))
+                    .addOnFailureListener(e -> callback.onCallback(false));
         }
-
-        db.collection(collectionName).document(document).update(data)
-                .addOnSuccessListener(aVoid -> callback.onCallback(true))
-                .addOnFailureListener(e -> callback.onCallback(false));
     }
-
     private static Map<String, Object> buildNestedMap(String[] keys, Object value) {
         Map<String, Object> result = new HashMap<>();
         Map<String, Object> current = result;
@@ -120,4 +159,66 @@ public class Firestore {
                     callback.onCallback(false);
                 });
     }
+
+    public static void createAccount(Account account, FirestoreAddCallback callback) {
+        db.collection("accounts")
+                .document(account.getUID())
+                .set(account)
+                .addOnSuccessListener(aVoid -> {
+                    // Thêm thành công
+                    callback.onCallback(true);
+                })
+                .addOnFailureListener(e -> {
+                    // Thêm thất bại
+                    callback.onCallback(false);
+                });
+    }
+
+    public interface FirestoreGetAccountCallback {
+        void onCallback(Account account);
+    }
+
+    public static void getAccount(String UID, FirestoreGetAccountCallback callback) {
+        db.collection("accounts")
+                .document(UID)
+                .get()
+                .addOnSuccessListener(documentSnapshot -> {
+                    if(documentSnapshot.exists()) {
+                        Account account = documentSnapshot.toObject(Account.class);
+                        assert account != null;
+                        account.setUID(UID);
+                        callback.onCallback(account);
+                    } else {
+                        // Nếu có lỗi xảy ra trong quá trình truy vấn, trả về false
+                        callback.onCallback(null);
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    // Nếu có lỗi xảy ra trong quá trình truy vấn, trả về false
+                    callback.onCallback(null);
+                });
+    }
+
+    public static void getAccountByUserId(String userId, FirestoreGetAccountCallback callback) {
+        db.collection("accounts")
+                .whereEqualTo("userId", userId)
+                .get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    if (!queryDocumentSnapshots.isEmpty()) {
+                        DocumentSnapshot document = queryDocumentSnapshots.getDocuments().get(0);
+                        Account account = document.toObject(Account.class);
+                        assert account != null;
+                        account.setUID(document.getId());
+                        callback.onCallback(account);
+                    } else {
+                        // Nếu không tìm thấy tài khoản, trả về null
+                        callback.onCallback(null);
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    // Nếu có lỗi xảy ra trong quá trình truy vấn, trả về null
+                    callback.onCallback(null);
+                });
+    }
+
 }

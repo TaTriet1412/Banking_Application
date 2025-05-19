@@ -18,9 +18,12 @@
     <color name="text_hint">#757575</color>
     <color name="forgot_password">#BEBEBE</color>
     <color name="button_text">#FFFCFC</color>
+    <color name="grey_text_dark">#333333</color>
     <color name="button_cancel">#FFFFFF</color>
     <color name="light_blue_400">#FF29B6F6</color>
     <color name="light_blue_600">#FF039BE5</color>
     <color name="gray_400">#FFBDBDBD</color>
     <color name="gray_600">#FF757575</color>
+    <color name="green_gradient_start">#4CAF50</color>
+    <color name="green_gradient_end">#2E7D32</color>
 </resources>

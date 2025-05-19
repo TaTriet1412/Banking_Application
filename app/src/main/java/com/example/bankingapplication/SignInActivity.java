@@ -14,13 +14,16 @@ import androidx.appcompat.app.AppCompatDelegate;
 
 import com.example.bankingapplication.Firebase.FirebaseAuth;
 import com.example.bankingapplication.Firebase.Firestore;
+import com.example.bankingapplication.Object.Account;
 import com.example.bankingapplication.Object.User;
 import com.example.bankingapplication.Utils.AudioEffectUtils;
 import com.example.bankingapplication.Utils.GlobalVariables;
-import com.example.bankingapplication.Utils.SecurePreferencesUtil;
+import com.example.bankingapplication.Utils.VariablesUtils;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException;
 import com.google.firebase.auth.FirebaseAuthInvalidUserException;
+
+import java.util.Objects;
 
 public class SignInActivity extends AppCompatActivity {
     TextInputEditText edtPassword, edtEmail;
@@ -77,15 +80,32 @@ public class SignInActivity extends AppCompatActivity {
                                     GlobalVariables globalVariables = GlobalVariables.getInstance();
                                     globalVariables.setCurrentUser(user);
 
-//                                    try {
-//                                        SecurePreferencesUtil.saveEmail(SignInActivity.this, email); // Lưu email vào SharedPreferences
-//                                    } catch (Exception e) {}
-                                    progressOverlay.setVisibility(View.GONE); // Ẩn loading overlay
-                                    Intent intent = new Intent(SignInActivity.this, MainActivity.class);
-                                    startActivity(intent);
+                                    if(Objects.equals(user.getRole(), VariablesUtils.CUSTOMER_ROLE)) {
+                                        Firestore.getAccountByUserId(user.getUID(), new Firestore.FirestoreGetAccountCallback() {
+                                            @Override
+                                            public void onCallback(Account account) {
+                                                if (account != null) {
+                                                    globalVariables.setCurrentAccount(account);
 
+                                                    progressOverlay.setVisibility(View.GONE); // Ẩn loading overlay
+                                                    Intent intent = new Intent(SignInActivity.this, CustomerMainActivity.class);
+                                                    startActivity(intent);
+                                                }   else {
+                                                    Toast.makeText(SignInActivity.this, "Không tìm thấy tài khoản", Toast.LENGTH_SHORT).show();
+                                                }
+                                            }
+                                        });
+                                    } else if (Objects.equals(user.getRole(), VariablesUtils.BANK_OFFICER_ROLE)) {
+                                        progressOverlay.setVisibility(View.GONE); // Ẩn loading overlay
+                                        Intent intent = new Intent(SignInActivity.this, BankOfficerMainActivity.class);
+                                        startActivity(intent);
+                                    } else {
+                                        progressOverlay.setVisibility(View.GONE); // Ẩn loading overlay
+                                        Toast.makeText(SignInActivity.this, "Không tìm thấy vai trò", Toast.LENGTH_SHORT).show();
+                                    }
                                 } else {
-                                    // User data retrieval failed
+                                    progressOverlay.setVisibility(View.GONE); // Ẩn loading overlay
+                                    Toast.makeText(SignInActivity.this, "Không tìm thấy tài khoản", Toast.LENGTH_SHORT).show();
                                 }
                             }
                         });

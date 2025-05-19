@@ -282,7 +282,7 @@ public class SignUpActivity extends AppCompatActivity {
         // For now, assuming ImageUtils handles the Firestore field update for each image.
         user = new User(uid, displayName, email, phoneNumber, address,
                 nationalId, "customer", gender.equals("Nam"), // Assuming "Nam" is the string for male
-                convertStringToTimestamp(birthday), Timestamp.now()
+                convertStringToTimestamp(birthday), Timestamp.now(),new Biometric()
                 ); // Biometric URLs will be set by ImageUtils
 
         Firestore.createUser(user, new Firestore.FirestoreAddCallback() {

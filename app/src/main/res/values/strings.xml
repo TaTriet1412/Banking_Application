@@ -5,6 +5,7 @@
     <string name="login">Đăng nhập</string>
     <string name="login_btn">Đăng nhập</string>
     <string name="pass">Mật khẩu</string>
+    <string name="pass_hint">******</string>
 
     <!-- Error   -->
     <string name="email_pass_wrong">E-mail hoặc mật khẩu không chính xác</string>
@@ -21,7 +22,8 @@
     <string name="card_back">Mặc sau CCCD</string>
     <string name="card_front">Mặc trước CCCD</string>
 
-<!--    Gender-->
+    <!--    Gender-->
     <string name="male">Nam</string>
     <string name="female">Nữ</string>
+    <string name="example_user">Nguyễn Văn A</string>
 </resources>

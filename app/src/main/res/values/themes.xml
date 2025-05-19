@@ -47,6 +47,20 @@
         <item name="android:layout_gravity">center</item>
     </style>
 
+    <style name="ButtonSignIn" parent="Text">
+        <item name="android:fontFamily">@font/lato_semibold</item>
+        <item name="android:textSize">20sp</item>
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">50dp</item>
+        <item name="android:layout_marginStart">1dp</item>
+        <item name="android:layout_marginEnd">1dp</item>
+        <item name="android:layout_marginBottom">5dp</item>
+        <item name="android:letterSpacing">0.01</item>
+        <item name="android:textColor">#FFF</item>
+        <item name="android:background">@drawable/bg_btn_sign_in</item>
+        <item name="android:layout_gravity">center</item>
+    </style>
+
     <style name="InfoEditText" parent="Text">
         <item name="android:background">@drawable/bg_input_field</item>
         <item name="android:padding">10dp</item>
