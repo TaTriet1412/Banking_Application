@@ -114,7 +114,7 @@
             </com.google.android.material.textfield.TextInputLayout>
         </androidx.cardview.widget.CardView>
 
-        <!-- Error Label -->
+        <!-- Error Label with background -->
         <androidx.appcompat.widget.AppCompatTextView
             android:id="@+id/lblError"
             style="@style/Text"
@@ -123,8 +123,11 @@
             android:layout_marginTop="@dimen/margin_error_top_textedit"
             android:visibility="invisible"
             android:text="@string/email_pass_wrong"
-            android:textColor="@color/error"
+            android:textColor="@color/white"
             android:textSize="@dimen/text_auth_err_size"
+            android:background="@drawable/bg_error_message"
+            android:padding="8dp"
+            android:gravity="center"
             app:layout_constraintTop_toBottomOf="@id/layoutPass"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent" />
