@@ -16,12 +16,12 @@ import com.example.bankingapplication.Object.Account;
 import com.example.bankingapplication.Object.User;
 import com.example.bankingapplication.Utils.GlobalVariables;
 import com.example.bankingapplication.Utils.NumberFormat;
-
+import android.content.Intent;
 public class CustomerMainActivity extends AppCompatActivity {
     ImageView iv_user_icon, iv_copy_account_number, iv_toggle_balance,
-            iv_charge_phone, iv_transfer_money;
+            iv_charge_phone;
 
-    LinearLayout ll_transaction_history, ll_account;
+    LinearLayout ll_transaction_history, ll_account, ll_transfer_money_feature;
 
     TextView tv_user_name, tv_account_number, tv_balance;
     FrameLayout progressOverlay;
@@ -37,9 +37,10 @@ public class CustomerMainActivity extends AppCompatActivity {
         iv_copy_account_number = findViewById(R.id.iv_copy_account_number);
         iv_toggle_balance = findViewById(R.id.iv_toggle_balance);
         iv_charge_phone = findViewById(R.id.iv_charge_phone);
-        iv_transfer_money = findViewById(R.id.iv_transfer_money);
+//        iv_transfer_money = findViewById(R.id.iv_transfer_money);
         ll_transaction_history = findViewById(R.id.ll_transaction_history);
         ll_account = findViewById(R.id.ll_account);
+        ll_transfer_money_feature = findViewById(R.id.ll_transfer_money_feature);
         tv_user_name = findViewById(R.id.tv_user_name);
         tv_account_number = findViewById(R.id.tv_account_number);
         tv_balance = findViewById(R.id.tv_balance);
@@ -55,11 +56,13 @@ public class CustomerMainActivity extends AppCompatActivity {
     private void initViews() {
         tv_user_name.setText(currentUser.getName());
         tv_account_number.setText(currentAccount.getAccountNumber());
+        tv_balance.setText(R.string.pass_hint);
     }
 
     private void initClickListeners() {
         toggleBalanceClick();
         copyAccountNumberClick();
+        transferMoneyFeatureClick();
         accountClick();
         phoneClick();
     }
@@ -94,6 +97,15 @@ public class CustomerMainActivity extends AppCompatActivity {
             clipboard.setPrimaryClip(clip);
             // Show a message to the user
             Toast.makeText(this, "Đã sao chép số tài khoản", Toast.LENGTH_SHORT).show();
+        });
+    }
+
+    // >>>>>> THÊM PHƯƠNG THỨC NÀY <<<<<<
+    private void transferMoneyFeatureClick() {
+        ll_transfer_money_feature.setOnClickListener(v -> {
+            // Tạo Intent để chuyển sang TransactionActivity
+            Intent intent = new Intent(CustomerMainActivity.this, TransactionActivity.class);
+            startActivity(intent);
         });
     }
 
