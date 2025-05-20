@@ -1,0 +1,196 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="16dp"
+    tools:context=".CustomerMortgageAccountFragment"> <!-- Thêm context để preview tốt hơn -->
+
+    <!-- Card 1: Số tiền vay (Header) -->
+    <com.google.android.material.card.MaterialCardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:cardCornerRadius="12dp"
+        app:cardElevation="4dp"
+        android:layout_marginBottom="16dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp"
+            android:background="@drawable/gradient_green"> <!-- Hoặc màu nền bạn muốn -->
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Số tiền vay"
+                android:textColor="@android:color/white"
+                android:textSize="16sp" />
+
+            <TextView
+                android:id="@+id/tv_officer_mortgage_loan_amount_header"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                tools:text="120.000.000 VNĐ"
+                android:textColor="@android:color/white"
+                android:textSize="24sp"
+                android:textStyle="bold"
+                android:layout_marginTop="4dp" />
+        </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
+
+    <!-- Card 2: Chi tiết khoản vay (Số tiền còn lại, Lãi suất, Nút chỉ báo) -->
+    <com.google.android.material.card.MaterialCardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:cardCornerRadius="12dp"
+        app:cardElevation="2dp"
+        android:layout_marginBottom="16dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <!-- Số tiền còn lại -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Số tiền còn lại"
+                    android:textColor="?android:attr/textColorSecondary"
+                    android:textSize="14sp"/>
+                <TextView
+                    android:id="@+id/tv_officer_mortgage_remaining_amount"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                tools:text="120.000.000 VNĐ"
+                android:textColor="?android:attr/textColorPrimary"
+                android:textSize="16sp"
+                android:textStyle="bold"/>
+            </LinearLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="?android:attr/listDivider"
+                android:layout_marginTop="12dp"
+                android:layout_marginBottom="12dp"/>
+
+            <!-- Lãi suất -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Lãi suất (%/năm)"
+                    android:textColor="?android:attr/textColorSecondary"
+                    android:textSize="14sp"/>
+                <TextView
+                    android:id="@+id/tv_officer_mortgage_interest_rate"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    tools:text="6 %"
+                    android:textColor="?android:attr/textColorPrimary"
+                    android:textSize="16sp"
+                    android:textStyle="bold"/>
+            </LinearLayout>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_officer_mortgage_details_indicator"
+                style="@style/Widget.MaterialComponents.Button.TextButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Chi tiết khoản vay"
+                android:layout_marginTop="16dp"
+                android:enabled="false"
+            android:backgroundTint="@color/light_orange_background"
+            android:textColor="@color/dark_orange_text" />
+        </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
+
+    <!-- Card 3: Thông tin khoản vay (Ngày bắt đầu, kết thúc, v.v.) -->
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/card_mortgage_loan_info_details"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:cardCornerRadius="12dp"
+        app:cardElevation="2dp"
+        android:layout_marginBottom="16dp">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Thông tin khoản vay"
+                android:textAppearance="?attr/textAppearanceSubtitle1"
+                android:textStyle="bold"
+                android:textColor="?android:attr/textColorPrimary"
+                android:layout_marginBottom="12dp"/>
+            <GridLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:columnCount="2">
+
+                <!-- Ngày bắt đầu -->
+                <TextView
+                    style="@style/CustomerDetailLabel"
+                android:text="Ngày bắt đầu:"/>
+                <TextView
+                    android:id="@+id/tv_officer_mortgage_start_date"
+                    style="@style/CustomerDetailValue"
+                tools:text="18/01/2025 23:58:56"/>
+
+                <!-- Ngày kết thúc dự kiến -->
+                <TextView
+                    style="@style/CustomerDetailLabel"
+                    android:layout_marginTop="8dp"
+                    android:text="Ngày kết thúc dự kiến:"/>
+                <TextView
+                    android:id="@+id/tv_officer_mortgage_end_date"
+                    style="@style/CustomerDetailValue"
+                    android:layout_marginTop="8dp"
+                    tools:text="18/01/2026 23:59:33"/>
+
+                <!-- Số tiền trả mỗi kỳ -->
+                <TextView
+                    style="@style/CustomerDetailLabel"
+                    android:layout_marginTop="8dp"
+                    android:text="Số tiền trả mỗi kỳ:"/>
+                <TextView
+                    android:id="@+id/tv_officer_mortgage_payment_amount"
+                    style="@style/CustomerDetailValue"
+                    android:layout_marginTop="8dp"
+                    tools:text="10.333.331 VNĐ"/>
+
+                <!-- Tần suất trả -->
+                <TextView
+                    style="@style/CustomerDetailLabel"
+                    android:layout_marginTop="8dp"
+                    android:text="Tần suất trả:"/>
+                <TextView
+                    android:id="@+id/tv_officer_mortgage_payment_frequency"
+                    style="@style/CustomerDetailValue"
+                    android:layout_marginTop="8dp"
+                    tools:text="monthly"/>
+            </GridLayout>
+        </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
+
+</LinearLayout>

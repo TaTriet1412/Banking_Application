@@ -44,6 +44,10 @@ dependencies {
     implementation("com.google.firebase:firebase-auth") // Firebase Authentication
     implementation("com.google.firebase:firebase-storage") // Firebase Storage
     implementation("com.google.firebase:firebase-firestore") // Firebase Firestore
+
+    implementation("com.google.firebase:firebase-appcheck-playintegrity")
+    implementation("com.google.firebase:firebase-appcheck-debug")
+
     implementation("com.google.android.gms:play-services-vision:20.0.0")
     implementation("com.google.mlkit:text-recognition:16.0.0-beta5")
     implementation("com.github.dikamahard:FaceCompareLibrary:1.0.2")

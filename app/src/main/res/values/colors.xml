@@ -43,4 +43,18 @@
     <color name="red_amount_text">#D32F2F</color> <!-- Red for amount -->
     <color name="text_link_blue">#007AFF</color> <!-- Blue for "Gửi lại" link -->
     <color name="otp_box_border">#BDBDBD</color>
+
+
+
+    <color name="dark_green_text">#004D24</color>
+    <color name="dark_blue_text">#0D47A1</color>
+    <color name="dark_orange_text">#E65100</color>
+    <color name="light_green_background">#E8F5E9</color>
+    <color name="light_blue_background">#E1F5FE</color>
+    <color name="light_orange_background">#FFF3E0</color>
+    <color name="light_purple_background">#E8E0F3</color>
+    <color name="your_main_green_color">#4CAF50</color>
+    <color name="bottom_nav_single_color">#4CAF50</color>
+    <color name="bottom_nav_text_active">#4A148C</color> <!-- Hoặc màu xanh bạn muốn -->
+    <color name="bottom_nav_text_inactive">@color/grey_text_dark</color>
 </resources>

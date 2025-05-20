@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fillViewport="true"
+    tools:context=".CustomerDetailsFragment">
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <!-- Phần thông tin cá nhân của khách hàng - THEO STYLE MÀU XANH (GIỮ NGUYÊN NHƯ TRƯỚC) -->
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/card_customer_personal_info"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="4dp"
+            android:layout_margin="@dimen/staff_screen_padding_horizontal"
+            android:layout_marginBottom="@dimen/staff_list_item_margin_bottom">
+            <!-- ... Nội dung của card thông tin khách hàng (giữ nguyên) ... -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp"
+                android:background="@drawable/gradient_green">
+
+                <!-- Avatar và Tên khách hàng -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginBottom="16dp">
+
+                    <com.google.android.material.imageview.ShapeableImageView
+                        android:id="@+id/img_customer_avatar_detail_officer"
+                        android:layout_width="48dp"
+                        android:layout_height="48dp"
+                        android:src="@drawable/ic_user_placeholder_white"
+                        app:shapeAppearanceOverlay="@style/ShapeAppearance.Material3.Corner.Full"
+                        android:scaleType="centerCrop"
+                        app:strokeColor="@android:color/white"
+                        app:strokeWidth="1dp" />
+
+                    <TextView
+                        android:id="@+id/tv_customer_detail_name"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        tools:text="Tạ Triết User"
+                        android:textColor="@android:color/white"
+                        android:textSize="18sp"
+                        android:textStyle="bold"
+                        android:layout_marginStart="12dp"/>
+                </LinearLayout>
+
+                <!-- Thông tin chi tiết dùng GridLayout -->
+                <GridLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:columnCount="2"
+                    android:layout_marginBottom="16dp">
+
+                    <!-- Hàng 1: Email -->
+                    <TextView
+                        android:text="Email:"
+                        style="@style/CustomerDetailLabel" /> <!-- Tạo style chung cho label -->
+                    <TextView
+                        android:id="@+id/tv_customer_detail_email"
+                        tools:text="email@example.com"
+                        style="@style/CustomerDetailValue" />
+
+                    <!-- Hàng 2: CCCD -->
+                    <TextView
+                        android:text="Số CCCD/CMND:"
+                        style="@style/CustomerDetailLabel"
+                        android:layout_marginTop="8dp"/>
+                    <TextView
+                        android:id="@+id/tv_customer_detail_id_card"
+                        tools:text="0123456789"
+                        style="@style/CustomerDetailValue"
+                        android:layout_marginTop="8dp"/>
+
+                    <!-- Hàng 3: Điện thoại -->
+                    <TextView
+                        android:text="Điện thoại:"
+                        style="@style/CustomerDetailLabel"
+                        android:layout_marginTop="8dp"/>
+                    <TextView
+                        android:id="@+id/tv_customer_detail_phone"
+                        tools:text="0901234567"
+                        style="@style/CustomerDetailValue"
+                        android:layout_marginTop="8dp"/>
+                </GridLayout>
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="0.5dp"
+                    android:background="#80FFFFFF"
+                    android:layout_marginBottom="12dp" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+                    <LinearLayout
+                        android:id="@+id/ll_edit_customer_info_officer"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:gravity="center"
+                        android:orientation="horizontal"
+                        android:paddingVertical="8dp"
+                        android:paddingEnd="8dp"
+                        tools:ignore="RtlSymmetry">
+                        <ImageView
+                            android:layout_width="20dp"
+                            android:layout_height="20dp"
+                            android:src="@drawable/ic_edit_white"
+                            app:tint="@android:color/white"/>
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Sửa thông tin"
+                            android:textColor="@android:color/white"
+                            android:textSize="14sp"
+                            android:layout_marginStart="8dp"/>
+                    </LinearLayout>
+                </LinearLayout>
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:paddingHorizontal="@dimen/staff_screen_padding_horizontal"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="8dp">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Chi tiết các tài khoản"
+                android:textAppearance="?attr/textAppearanceHeadline6"/>
+        </LinearLayout>
+
+        <com.google.android.material.tabs.TabLayout
+            android:id="@+id/tab_layout_customer_accounts"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:tabMode="fixed"
+            app:tabGravity="fill"/>
+
+        <androidx.viewpager2.widget.ViewPager2
+            android:id="@+id/view_pager_customer_accounts"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+    </LinearLayout>
+</androidx.core.widget.NestedScrollView>

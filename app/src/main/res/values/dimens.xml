@@ -17,7 +17,7 @@
     <dimen name="default_back_btn_dimens">50dp</dimen>
     <dimen name="app_padding_horizontal_2x">48dp</dimen>
     <dimen name="app_padding_vertical">24dp</dimen>
-    <dimen name="app_padding_horizontal">30dp</dimen>
+    <dimen name="app_padding_horizontal">16dp</dimen>
     <dimen name="border_radius_default">12dp</dimen>
     <dimen name="border_radius_large">24dp</dimen>
     <dimen name="text_heading_size">32sp</dimen>
@@ -29,4 +29,26 @@
     <dimen name="img_null_margin_bottom">30dp</dimen>
     <dimen name="cardview_padding">13dp</dimen>
     <dimen name="list_item_distance">8dp</dimen>
+
+    <dimen name="staff_screen_padding_horizontal">16dp</dimen>
+    <dimen name="staff_screen_padding_vertical">16dp</dimen>
+
+    <dimen name="staff_card_corner_radius">12dp</dimen>
+    <dimen name="staff_card_elevation">4dp</dimen>
+    <dimen name="staff_list_item_margin_bottom">12dp</dimen>
+    <dimen name="staff_list_item_spacing_outer">8dp</dimen>
+    <dimen name="staff_container_padding_horizontal">16dp</dimen>
+    <dimen name="staff_list_item_avatar_size">48dp</dimen>
+    <dimen name="staff_list_item_text_margin_start">16dp</dimen>
+    <dimen name="staff_icon_button_size">40dp</dimen>
+    <dimen name="staff_icon_button_padding">8dp</dimen>
+    <dimen name="staff_icon_button_margin_end">8dp</dimen>
+
+    <dimen name="staff_profile_avatar_size">100dp</dimen>
+    <dimen name="staff_profile_avatar_margin_top">24dp</dimen>
+    <dimen name="staff_profile_avatar_internal_padding">4dp</dimen>
+    <dimen name="staff_profile_avatar_stroke_width">2dp</dimen>
+    <dimen name="staff_profile_field_group_margin_top">24dp</dimen>
+    <dimen name="staff_profile_field_margin_top">12dp</dimen>
+    <dimen name="staff_profile_field_value_margin_start">8dp</dimen>
 </resources>
