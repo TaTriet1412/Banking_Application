@@ -29,6 +29,6 @@
     <dimen name="img_null_margin_bottom">30dp</dimen>
     <dimen name="cardview_padding">13dp</dimen>
     <dimen name="list_item_distance">8dp</dimen>
-
+    <dimen name="bottom_sheet_peek_height">100dp</dimen>
     <dimen name="button_original_bottom_margin">16dp</dimen>
 </resources>

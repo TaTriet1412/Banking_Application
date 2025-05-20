@@ -105,16 +105,17 @@
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 
-    <com.google.android.material.button.MaterialButton
+    <androidx.appcompat.widget.AppCompatButton
         android:id="@+id/btn_confirm_transaction"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom"
         android:text="Xác nhận"
+        android:textColor="@color/white"
         android:layout_margin="16dp"
         android:paddingTop="12dp"
         android:paddingBottom="12dp"
-        android:backgroundTint="?attr/colorPrimary"
+        android:background="@drawable/bg_btn_gradient_green"
         app:cornerRadius="8dp" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

@@ -16,12 +16,12 @@ import com.example.bankingapplication.Object.Account;
 import com.example.bankingapplication.Object.User;
 import com.example.bankingapplication.Utils.GlobalVariables;
 import com.example.bankingapplication.Utils.NumberFormat;
-import android.content.Intent;
+
 public class CustomerMainActivity extends AppCompatActivity {
     ImageView iv_user_icon, iv_copy_account_number, iv_toggle_balance,
             iv_charge_phone;
 
-    LinearLayout ll_transaction_history, ll_account, ll_transfer_money_feature;
+    LinearLayout ll_transaction_history, ll_account, ll_transfer_money_feature, ll_nearby_branches_feature; ;
 
     TextView tv_user_name, tv_account_number, tv_balance;
     FrameLayout progressOverlay;
@@ -45,6 +45,10 @@ public class CustomerMainActivity extends AppCompatActivity {
         tv_account_number = findViewById(R.id.tv_account_number);
         tv_balance = findViewById(R.id.tv_balance);
 
+        // <<<<<< ÁNH XẠ VIEW MỚI CHO CHỨC NĂNG BẢN ĐỒ >>>>>>
+        ll_nearby_branches_feature = findViewById(R.id.ll_nearby_branches_feature);
+        // >>>>>> THÊM VIEW MỚI CHO CHỨC NĂNG BẢN ĐỒ <<<<<<
+
         currentAccount = GlobalVariables.getInstance().getCurrentAccount();
         currentUser = GlobalVariables.getInstance().getCurrentUser();
 
@@ -65,6 +69,7 @@ public class CustomerMainActivity extends AppCompatActivity {
         transferMoneyFeatureClick();
         accountClick();
         phoneClick();
+        nearbyBranchesFeatureClick(); // <<<<<< GỌI PHƯƠNG THỨC XỬ LÝ CLICK MỚI
     }
 
     @SuppressLint("SetTextI18n")
@@ -113,6 +118,13 @@ public class CustomerMainActivity extends AppCompatActivity {
         ll_account.setOnClickListener(v -> {
             // Handle account click
             Intent intent = new Intent(this, AccountActivity.class);
+            startActivity(intent);
+        });
+    }
+    // <<<<<< THÊM PHƯƠNG THỨC XỬ LÝ CLICK CHO CHỨC NĂNG BẢN ĐỒ >>>>>>
+    private void nearbyBranchesFeatureClick() {
+        ll_nearby_branches_feature.setOnClickListener(v -> {
+            Intent intent = new Intent(CustomerMainActivity.this, NavigationActivity.class);
             startActivity(intent);
         });
     }
