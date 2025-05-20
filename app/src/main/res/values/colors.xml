@@ -20,6 +20,7 @@
     <color name="green_abstract_shape">#38A85E</color>
     <color name="divider_color">#E0E0E0</color>
     <color name="green_primary">#4CAF50</color>
+    <color name="text_secondary">#757575</color>
     <color name="green_secondary">#388E3C</color>
     <color name="primary">#67EB4F</color>
     <color name="secondary">#FCCD2A</color>

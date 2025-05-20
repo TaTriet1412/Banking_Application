@@ -46,7 +46,6 @@
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
 
-
                 <!-- Thẻ thông tin tài khoản -->
                 <androidx.cardview.widget.CardView
                     android:id="@+id/account_info_card"
@@ -54,9 +53,10 @@
                     android:layout_height="wrap_content"
                     android:layout_marginStart="16dp"
                     android:layout_marginEnd="16dp"
-
+                    android:layout_marginBottom="24dp"
                     app:cardCornerRadius="16dp"
-                    app:cardElevation="4dp"
+                    app:cardElevation="20dp"
+                    android:translationZ="8dp"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent">
@@ -304,12 +304,16 @@
                 </LinearLayout>
 
                 <LinearLayout
+                    android:id="@+id/ll_transfer_money_feature"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_columnWeight="1"
                     android:gravity="center_horizontal"
                     android:orientation="vertical"
                     android:padding="8dp">
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:background="?attr/selectableItemBackground">
 
                     <ImageView
                         android:id="@+id/iv_transfer_money"
@@ -331,6 +335,7 @@
                 </LinearLayout>
 
                 <LinearLayout
+                    android:id="@+id/ll_nearby_branches_feature"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_columnWeight="1"
@@ -339,9 +344,10 @@
                     android:padding="8dp">
 
                     <ImageView
+                        android:id="@+id/iv_map"
                         android:layout_width="40dp"
                         android:layout_height="40dp"
-                        android:src="@drawable/ic_tranfer_bank"
+                        android:src="@drawable/ic_map"
                         android:padding="8dp"
                         android:background="@drawable/ic_feature_icon_bg_placeholder"
                         android:contentDescription="Transfer money"/>
@@ -349,7 +355,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="4dp"
-                        android:text="Chuyển tiền ngân hàng"
+                        android:text="Các phòng giao dịch gần nhất"
                         android:textAlignment="center"
                         android:textColor="@color/grey_text_dark"
                         android:textSize="12sp" />

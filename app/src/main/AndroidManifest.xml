@@ -6,11 +6,30 @@
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
 
+    <!-- Quyền truy cập vị trí chính xác -->
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <!-- Quyền truy cập vị trí tương đối (dự phòng) -->
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+
     <uses-feature android:name="android.hardware.camera" />
     <uses-feature android:name="android.hardware.camera.autofocus" />
 
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+
+    <uses-permission android:name="android.permission.WRITE_CONTACTS" />
+    <uses-permission android:name="android.permission.READ_CONTACTS" />
+    <queries>,
+        <intent>
+            <action android:name="android.intent.action.INSERT" />
+            <data android:mimeType="vnd.android.cursor.dir/raw_contact" />
+        </intent>
+        <!-- You might also need one for viewing contacts if you ever do that -->
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <data android:mimeType="vnd.android.cursor.dir/contact" />
+        </intent>
+    </queries>
 
     <application
         android:allowBackup="true"
@@ -22,29 +41,48 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.BankingApplication"
+        android:usesCleartextTraffic="true"
         tools:ignore="LockedOrientationActivity"
         tools:targetApi="31">
+
         <activity
             android:name=".SignInActivity"
-            android:exported="true" >
+            
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
 
-        <intent-filter>
-            <action android:name="android.intent.action.MAIN" />
-
-            <category android:name="android.intent.category.LAUNCHER" />
-        </intent-filter>
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
         </activity>
+
+        <activity
+            android:name=".NavigationActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ConfirmRechargePhoneActivity"
+            android:exported="false"/>
+
 
         <activity
             android:name=".RechargePhoneActivity"
             android:exported="false" />
+ 
         <activity
-            android:name=".ConfirmRechargePhoneActivity"
+            android:name=".ConfirmTransactionActivity"
+            android:exported="false" />
+        <activity
+            android:name=".TransactionActivity"
             android:exported="false" />
         <activity
             android:name=".BankOfficerMainActivity"
             android:exported="false" />
 
+
+
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="AIzaSyA6hT7klVvK35tmjh3W9UKF8JMhCBWs-Co" />
         <uses-native-library
             android:name="libOpenCL.so"
             android:required="false" />
@@ -59,6 +97,8 @@
                 android:resource="@xml/file_paths" />
         </provider>
 
+
+
         <activity
             android:name=".SignUpActivity"
             android:configChanges="orientation|screenSize"
@@ -66,12 +106,27 @@
             android:screenOrientation="unspecified" />
         <activity
             android:name=".AccountActivity"
-            android:exported="false">
-        </activity>
+            android:exported="false"/>
         <activity
             android:name=".CustomerMainActivity"
             android:exported="true"
             android:screenOrientation="portrait" />
+        <activity
+            android:name=".WebViewPaymentActivity"
+            android:exported="false"
+            android:configChanges="orientation|screenSize" />
+        <activity
+            android:name=".PaymentReturnActivity"
+            android:exported="true"
+            android:launchMode="singleTask"> <!-- singleTask hoặc singleTop để tránh tạo nhiều instance -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <!-- Quan trọng: scheme và host phải khớp với vnp_ReturnUrl đã khai báo -->
+                <data android:scheme="myapp" android:host="vnpayresponse" />
+            </intent-filter>
+        </activity>
 
         <activity
             android:name=".EditCustomerInfoActivity"
@@ -80,5 +135,4 @@
             android:parentActivityName=".BankOfficerMainActivity"
             android:windowSoftInputMode="adjustResize" />
     </application>
-
 </manifest>

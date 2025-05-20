@@ -19,9 +19,9 @@ import com.example.bankingapplication.Utils.NumberFormat;
 
 public class CustomerMainActivity extends AppCompatActivity {
     ImageView iv_user_icon, iv_copy_account_number, iv_toggle_balance,
-            iv_charge_phone, iv_transfer_money;
+            iv_charge_phone;
 
-    LinearLayout ll_transaction_history, ll_account;
+    LinearLayout ll_transaction_history, ll_account, ll_transfer_money_feature, ll_nearby_branches_feature; ;
 
     TextView tv_user_name, tv_account_number, tv_balance;
     FrameLayout progressOverlay;
@@ -37,12 +37,17 @@ public class CustomerMainActivity extends AppCompatActivity {
         iv_copy_account_number = findViewById(R.id.iv_copy_account_number);
         iv_toggle_balance = findViewById(R.id.iv_toggle_balance);
         iv_charge_phone = findViewById(R.id.iv_charge_phone);
-        iv_transfer_money = findViewById(R.id.iv_transfer_money);
+//        iv_transfer_money = findViewById(R.id.iv_transfer_money);
         ll_transaction_history = findViewById(R.id.ll_transaction_history);
         ll_account = findViewById(R.id.ll_account);
+        ll_transfer_money_feature = findViewById(R.id.ll_transfer_money_feature);
         tv_user_name = findViewById(R.id.tv_user_name);
         tv_account_number = findViewById(R.id.tv_account_number);
         tv_balance = findViewById(R.id.tv_balance);
+
+        // <<<<<< ÁNH XẠ VIEW MỚI CHO CHỨC NĂNG BẢN ĐỒ >>>>>>
+        ll_nearby_branches_feature = findViewById(R.id.ll_nearby_branches_feature);
+        // >>>>>> THÊM VIEW MỚI CHO CHỨC NĂNG BẢN ĐỒ <<<<<<
 
         currentAccount = GlobalVariables.getInstance().getCurrentAccount();
         currentUser = GlobalVariables.getInstance().getCurrentUser();
@@ -55,13 +60,16 @@ public class CustomerMainActivity extends AppCompatActivity {
     private void initViews() {
         tv_user_name.setText(currentUser.getName());
         tv_account_number.setText(currentAccount.getAccountNumber());
+        tv_balance.setText(R.string.pass_hint);
     }
 
     private void initClickListeners() {
         toggleBalanceClick();
         copyAccountNumberClick();
+        transferMoneyFeatureClick();
         accountClick();
         phoneClick();
+        nearbyBranchesFeatureClick(); // <<<<<< GỌI PHƯƠNG THỨC XỬ LÝ CLICK MỚI
     }
 
     @SuppressLint("SetTextI18n")
@@ -97,10 +105,26 @@ public class CustomerMainActivity extends AppCompatActivity {
         });
     }
 
+    // >>>>>> THÊM PHƯƠNG THỨC NÀY <<<<<<
+    private void transferMoneyFeatureClick() {
+        ll_transfer_money_feature.setOnClickListener(v -> {
+            // Tạo Intent để chuyển sang TransactionActivity
+            Intent intent = new Intent(CustomerMainActivity.this, TransactionActivity.class);
+            startActivity(intent);
+        });
+    }
+
     private void accountClick() {
         ll_account.setOnClickListener(v -> {
             // Handle account click
             Intent intent = new Intent(this, AccountActivity.class);
+            startActivity(intent);
+        });
+    }
+    // <<<<<< THÊM PHƯƠNG THỨC XỬ LÝ CLICK CHO CHỨC NĂNG BẢN ĐỒ >>>>>>
+    private void nearbyBranchesFeatureClick() {
+        ll_nearby_branches_feature.setOnClickListener(v -> {
+            Intent intent = new Intent(CustomerMainActivity.this, NavigationActivity.class);
             startActivity(intent);
         });
     }
