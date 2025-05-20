@@ -2,12 +2,10 @@ package com.example.bankingapplication.Firebase;
 
 import android.util.Log;
 
-import androidx.annotation.NonNull;
-
 import com.example.bankingapplication.Object.Account;
+import com.example.bankingapplication.Object.Bill;
+import com.example.bankingapplication.Object.TransactionData;
 import com.example.bankingapplication.Object.User;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -48,6 +46,10 @@ public class Firestore {
 
     public interface FirestoreAddCallback {
         void onCallback(boolean isSuccess);
+    }
+
+    public static String generateId(String prefix) {
+        return prefix + System.currentTimeMillis() + (int) (Math.random() * 100);
     }
 
 
@@ -219,6 +221,125 @@ public class Firestore {
                     // Nếu có lỗi xảy ra trong quá trình truy vấn, trả về null
                     callback.onCallback(null);
                 });
+    }
+
+    public interface getTransactionCallback {
+        void onCallback(TransactionData transactionData);
+    }
+
+    public static void getTransaction(String UID, getTransactionCallback callback) {
+        db.collection("transactions")
+                .document(UID)
+                .get()
+                .addOnSuccessListener(documentSnapshot -> {
+                    if(documentSnapshot.exists()) {
+                        TransactionData transactionData = documentSnapshot.toObject(TransactionData.class);
+                        assert transactionData != null;
+                        transactionData.setUID(UID);
+                        callback.onCallback(transactionData);
+                    } else {
+                        // Nếu có lỗi xảy ra trong quá trình truy vấn, trả về false
+                        callback.onCallback(null);
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    // Nếu có lỗi xảy ra trong quá trình truy vấn, trả về false
+                    callback.onCallback(null);
+                });
+    }
+
+    public static void addEditTransaction (TransactionData transactionData, FirestoreAddCallback callback) {
+        db.collection("transactions")
+                .document(transactionData.getUID())
+                .set(transactionData)
+                .addOnSuccessListener(aVoid -> {
+                    // Thêm thành công
+                    callback.onCallback(true);
+                })
+                .addOnFailureListener(e -> {
+                    // Thêm thất bại
+                    callback.onCallback(false);
+                });
+    }
+
+    public static void getTransactionById(String transactionId, FirestoreGetTransactionCallback callback) {
+        if (transactionId == null || transactionId.isEmpty()) {
+            Log.e("Firestore", "getTransactionById called with null or empty ID");
+            callback.onCallback(null);
+            return;
+        }
+        
+        db.collection("transactions").document(transactionId)
+            .get()
+            .addOnSuccessListener(documentSnapshot -> {
+                if (documentSnapshot.exists()) {
+                    TransactionData transaction = documentSnapshot.toObject(TransactionData.class);
+                    if (transaction != null) {
+                        // Ensure the UID is set since Firestore doesn't store it in the document
+                        transaction.setUID(documentSnapshot.getId());
+                    }
+                    callback.onCallback(transaction);
+                } else {
+                    Log.d("Firestore", "Transaction document does not exist");
+                    callback.onCallback(null);
+                }
+            })
+            .addOnFailureListener(e -> {
+                Log.e("Firestore", "Error getting transaction document", e);
+                callback.onCallback(null);
+            });
+    }
+
+    public static void addEditBill (Bill bill, FirestoreAddCallback callback) {
+        db.collection("bills")
+                .document(bill.getUID())
+                .set(bill)
+                .addOnSuccessListener(aVoid -> {
+                    // Thêm thành công
+                    callback.onCallback(true);
+                })
+                .addOnFailureListener(e -> {
+                    // Thêm thất bại
+                    callback.onCallback(false);
+                });
+    }
+
+    public static void getBillById(String billId, FirestoreGetBillCallback callback) {
+        if (billId == null || billId.isEmpty()) {
+            Log.e("Firestore", "getBillById called with null or empty ID");
+            callback.onCallback(null);
+            return;
+        }
+        
+        db.collection("bills").document(billId)
+            .get()
+            .addOnSuccessListener(documentSnapshot -> {
+                if (documentSnapshot.exists()) {
+                    Bill bill = documentSnapshot.toObject(Bill.class);
+                    if (bill != null) {
+                        // Ensure the UID is set since Firestore doesn't store it in the document
+                        bill.setUID(documentSnapshot.getId());
+                    }
+                    callback.onCallback(bill);
+                } else {
+                    Log.d("Firestore", "Bill document does not exist");
+                    callback.onCallback(null);
+                }
+            })
+            .addOnFailureListener(e -> {
+                Log.e("Firestore", "Error getting bill document", e);
+                callback.onCallback(null);
+            });
+    }
+
+    // Interface for getting a Transaction
+    public interface FirestoreGetTransactionCallback {
+        void onCallback(TransactionData transaction);
+    }
+
+    // Interface for getting a Bill
+    public interface FirestoreGetBillCallback {
+        void onCallback(Bill bill);
     }
 
 }
