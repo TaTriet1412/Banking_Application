@@ -8,10 +8,7 @@
     android:layout_height="match_parent"
     tools:context=".SignInActivity">
 
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        >
+
 
         <ImageView
             android:id="@+id/backgroundImage"
@@ -29,27 +26,34 @@
             android:id="@+id/logoText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="3T Banking"
+            android:text="@string/app_name"
             android:textColor="@android:color/white"
             android:textStyle="bold"
-            android:textSize="24sp"
-            android:layout_marginTop="16dp"
-            android:layout_marginStart="16dp"
+            android:textSize="40sp"
+            android:layout_marginTop="40dp"
+            android:layout_marginStart="20dp"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintStart_toStartOf="parent" />
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/layoutAuthContainer"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginHorizontal="@dimen/app_padding_horizontal">
 
         <!--Email Login Box-->
         <androidx.cardview.widget.CardView
             android:id="@+id/layoutEmail"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/app_padding_horizontal"
-            android:layout_marginEnd="@dimen/app_padding_horizontal"
             android:translationZ="@dimen/default_translation_z"
             app:cardCornerRadius="@dimen/default_corner_radius"
-            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            tools:layout_editor_absoluteY="194dp">
+            app:layout_constraintEnd_toEndOf="parent">
 
             <com.google.android.material.textfield.TextInputLayout
                 android:layout_width="match_parent"
@@ -78,23 +82,18 @@
         <!--Password Login Box-->
         <androidx.cardview.widget.CardView
             android:id="@+id/layoutPass"
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/app_padding_horizontal"
-            android:layout_marginEnd="@dimen/app_padding_horizontal"
-            android:layout_marginBottom="50dp"
-            android:layout_marginTop="50dp"
+            android:layout_marginTop="20dp"
             android:translationZ="@dimen/default_translation_z"
             app:cardCornerRadius="@dimen/default_corner_radius"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintTop_toBottomOf="@id/layoutEmail"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/layoutEmail">
+            app:layout_constraintEnd_toEndOf="parent">
 
             <com.google.android.material.textfield.TextInputLayout
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/edittext_min_height"
-                android:drawableStart="@color/white"
                 android:minHeight="48dp"
                 app:boxBackgroundMode="none"
                 app:expandedHintEnabled="false"
@@ -114,46 +113,46 @@
                     android:textColorHint="@color/text_hint" />
             </com.google.android.material.textfield.TextInputLayout>
         </androidx.cardview.widget.CardView>
-        <!--  error Password Login Annotation-->
-        <!--  error Email Login Annotation-->
+
+        <!-- Error Label -->
         <androidx.appcompat.widget.AppCompatTextView
             android:id="@+id/lblError"
             style="@style/Text"
-            android:layout_marginTop="@dimen/margin_error_top_textedit"
             android:layout_width="0dp"
-            android:visibility="invisible"
             android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/margin_error_top_textedit"
+            android:visibility="invisible"
             android:text="@string/email_pass_wrong"
             android:textColor="@color/error"
             android:textSize="@dimen/text_auth_err_size"
-            app:layout_constraintStart_toStartOf="@id/layoutPass"
-            app:layout_constraintTop_toBottomOf="@id/layoutPass"/>
+            app:layout_constraintTop_toBottomOf="@id/layoutPass"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
 
-
+        <!-- Sign In Button -->
         <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/btnSignIn"
             style="@style/ButtonSignIn"
             android:layout_width="0dp"
-            android:layout_marginTop="28dp"
+            android:layout_marginTop="20dp"
             android:text="@string/login_btn"
-            app:layout_constraintEnd_toEndOf="@id/layoutPass"
-            app:layout_constraintHorizontal_bias="0.0"
-            app:layout_constraintStart_toStartOf="@id/layoutPass"
-            app:layout_constraintTop_toBottomOf="@+id/lblError" />
+            app:layout_constraintTop_toBottomOf="@id/lblError"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
 
+        <!-- Sign Up Button -->
         <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/btnSignUp"
             style="@style/ButtonSignUp"
             android:layout_width="0dp"
-            android:layout_marginTop="28dp"
+            android:layout_marginTop="20dp"
             android:text="@string/register_btn"
-            app:layout_constraintEnd_toEndOf="@id/btnSignIn"
-            app:layout_constraintHorizontal_bias="0.0"
-            app:layout_constraintStart_toStartOf="@id/btnSignIn"
-            app:layout_constraintTop_toBottomOf="@+id/btnSignIn" />
-
+            app:layout_constraintTop_toBottomOf="@id/btnSignIn"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
+
 
     <!-- Lớp phủ hiển thị loading (progress overlay) -->
     <include layout="@layout/progress_overlay"/>

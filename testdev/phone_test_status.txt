@@ -1,0 +1,47 @@
+- Sai định dạng
+https://api.veriphone.io/v2/verify?phone=0987654322&key=7169F3F6569C4F319A6642A87A94F672
+
+{"status": "success","phone": "0987654322","phone_valid": false,"phone_type": "unknown",
+"phone_region": "","country": "","country_code": "","country_prefix": "0",
+"international_number": "+44 987654322","local_number": "987654322","e164": "+44987654322",
+"carrier": ""}
+
+- Đúng định dạng 
+*10 sốsố
+
++ Viettel
+
+https://api.veriphone.io/v2/verify?phone=0987654321&key=7169F3F6569C4F319A6642A87A94F672
+
+{"status": "success","phone": "+84987654321","phone_valid": true,"phone_type": "mobile",
+"phone_region": "Vietnam","country": "Vietnam","country_code": "VN","country_prefix": "84",
+"international_number": "+84 987 654 321","local_number": "0987 654 321","e164": "+84987654321",
+"carrier": "Viettel"}
+
+---------------------------------------------------------------------------------------------------
++ MobiFone
+
+https://api.veriphone.io/v2/verify?phone=0901234567&key=7169F3F6569C4F319A6642A87A94F672
+
+{"status": "success","phone": "+84901234567","phone_valid": true,"phone_type": "mobile",
+"phone_region": "Vietnam","country": "Vietnam","country_code": "VN","country_prefix": "84",
+"international_number": "+84 901 234 567","local_number": "0901 234 567","e164": "+84901234567",
+"carrier": "MobiFone"}
+
+---------------------------------------------------------------------------------------------------
++ Vinaphone
+
+https://api.veriphone.io/v2/verify?phone=0944556677&key=7169F3F6569C4F319A6642A87A94F672
+{"status": "success","phone": "+84944556677","phone_valid": true,"phone_type": "mobile",
+"phone_region": "Vietnam","country": "Vietnam","country_code": "VN","country_prefix": "84",
+"international_number": "+84 944 556 677","local_number": "0944 556 677","e164": "+84944556677",
+"carrier": "Vinaphone"}
+
+*11 số
+
+https://api.veriphone.io/v2/verify?phone=84987654322&key=7169F3F6569C4F319A6642A87A94F672
+
+{"status": "success","phone": "+84987654322","phone_valid": true,"phone_type": "mobile",
+"phone_region": "Vietnam","country": "Vietnam","country_code": "VN","country_prefix": "84",
+"international_number": "+84 987 654 322","local_number": "0987 654 322","e164": "+84987654322",
+"carrier": "Viettel"}

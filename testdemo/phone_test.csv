@@ -1,0 +1,16 @@
+phone,status,valid,e164,local,type,country,region,carrier
+84987654321,success,TRUE,84987654321,0987654321,mobile,Vietnam,Vietnam,Viettel
+84391234567,success,TRUE,84391234567,0391234567,mobile,Vietnam,Vietnam,Viettel
+84977112233,success,TRUE,84977112233,0977112233,mobile,Vietnam,Vietnam,Viettel
+84355667788,success,TRUE,84355667788,0355667788,mobile,Vietnam,Vietnam,Viettel
+84966123789,success,TRUE,84966123789,0966123789,mobile,Vietnam,Vietnam,Viettel
+84901234567,success,TRUE,84901234567,0901234567,mobile,Vietnam,Vietnam,MobiFone
+84777888999,success,TRUE,84777888999,0777888999,mobile,Vietnam,Vietnam,MobiFone
+84933221100,success,TRUE,84933221100,0933221100,mobile,Vietnam,Vietnam,MobiFone
+84700112233,success,TRUE,84700112233,0700112233,mobile,Vietnam,Vietnam,MobiFone
+84799887766,success,TRUE,84799887766,0799887766,mobile,Vietnam,Vietnam,MobiFone
+84912345678,success,TRUE,84912345678,0912345678,mobile,Vietnam,Vietnam,Vinaphone
+84888777666,success,TRUE,84888777666,0888777666,mobile,Vietnam,Vietnam,Vinaphone
+84944556677,success,TRUE,84944556677,0944556677,mobile,Vietnam,Vietnam,Vinaphone
+84833445566,success,TRUE,84833445566,0833445566,mobile,Vietnam,Vietnam,Vinaphone
+84811223344,success,TRUE,84811223344,0811223344,mobile,Vietnam,Vietnam,Vinaphone

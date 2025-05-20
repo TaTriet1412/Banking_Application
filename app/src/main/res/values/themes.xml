@@ -57,7 +57,7 @@
         <item name="android:layout_marginBottom">5dp</item>
         <item name="android:letterSpacing">0.01</item>
         <item name="android:textColor">#FFF</item>
-        <item name="android:background">@drawable/bg_btn_sign_in</item>
+        <item name="android:background">@drawable/bg_btn_gradient_green</item>
         <item name="android:layout_gravity">center</item>
     </style>
 

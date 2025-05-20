@@ -1,6 +1,7 @@
 package com.example.bankingapplication;
 
 import android.annotation.SuppressLint;
+import android.content.Intent;
 import android.os.Bundle;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
@@ -62,18 +63,28 @@ public class CustomerMainActivity extends AppCompatActivity {
         toggleBalanceClick();
         copyAccountNumberClick();
         transferMoneyFeatureClick();
+        accountClick();
+        phoneClick();
     }
 
     @SuppressLint("SetTextI18n")
     private void toggleBalanceClick() {
         iv_toggle_balance.setOnClickListener(v -> {
-            if (tv_balance.getText().toString().equals(getString(R.string.pass_hint))) {
-                tv_balance.setText(NumberFormat.convertToCurrencyFormat(currentAccount.getChecking().getBalance()));
+            if (tv_balance.getText().toString().contains("*")) {
+                tv_balance.setText(NumberFormat.convertToCurrencyFormatHasUnit(currentAccount.getChecking().getBalance()));
                 iv_toggle_balance.setImageResource(R.drawable.ic_un_eye);
             } else {
                 tv_balance.setText(R.string.pass_hint);
                 iv_toggle_balance.setImageResource(R.drawable.ic_eye);
             }
+        });
+    }
+
+    private void phoneClick() {
+        iv_charge_phone.setOnClickListener(v -> {
+            // Handle phone charge click
+            Intent intent = new Intent(this, RechargePhoneActivity.class);
+            startActivity(intent);
         });
     }
 
@@ -94,6 +105,14 @@ public class CustomerMainActivity extends AppCompatActivity {
         ll_transfer_money_feature.setOnClickListener(v -> {
             // Tạo Intent để chuyển sang TransactionActivity
             Intent intent = new Intent(CustomerMainActivity.this, TransactionActivity.class);
+            startActivity(intent);
+        });
+    }
+
+    private void accountClick() {
+        ll_account.setOnClickListener(v -> {
+            // Handle account click
+            Intent intent = new Intent(this, AccountActivity.class);
             startActivity(intent);
         });
     }
