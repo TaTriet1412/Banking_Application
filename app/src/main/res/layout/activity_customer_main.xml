@@ -343,9 +343,10 @@
                     android:padding="8dp">
 
                     <ImageView
+                        android:id="@+id/iv_map"
                         android:layout_width="40dp"
                         android:layout_height="40dp"
-                        android:src="@drawable/ic_tranfer_bank"
+                        android:src="@drawable/ic_map"
                         android:padding="8dp"
                         android:background="@drawable/ic_feature_icon_bg_placeholder"
                         android:contentDescription="Transfer money"/>
@@ -353,7 +354,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="4dp"
-                        android:text="Chuyển tiền ngân hàng"
+                        android:text="Các phòng giao dịch gần nhất"
                         android:textAlignment="center"
                         android:textColor="@color/grey_text_dark"
                         android:textSize="12sp" />

@@ -18,7 +18,7 @@
             android:id="@+id/toolbar_confirm"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            android:background="?attr/colorPrimary"
+            android:background="@color/green_primary"
             app:navigationIcon="@drawable/ic_arrow_back"
             app:title="Xác nhận giao dịch" />
 
