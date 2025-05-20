@@ -40,6 +40,7 @@ dependencies {
     implementation("io.github.chaosleung:pinview:1.4.4")
 
     implementation(platform("com.google.firebase:firebase-bom:33.4.0"))
+    implementation ("androidx.browser:browser:1.5.0")
     // Thêm các phụ thuộc các dịch vụ cụ thể của Firebase
     implementation("com.google.firebase:firebase-auth") // Firebase Authentication
     implementation("com.google.firebase:firebase-storage") // Firebase Storage
