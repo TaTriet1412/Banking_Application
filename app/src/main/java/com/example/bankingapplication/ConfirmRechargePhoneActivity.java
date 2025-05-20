@@ -1,10 +1,9 @@
-
-
 package com.example.bankingapplication;
 
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.Handler;
@@ -24,6 +23,7 @@ import android.widget.Toast;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.browser.customtabs.CustomTabsIntent;
 
 import com.chaos.view.PinView; // Import PinView
 import com.example.bankingapplication.Object.Account;
@@ -32,6 +32,7 @@ import com.example.bankingapplication.R; // Replace with your actual R file
 import com.example.bankingapplication.Utils.EmailUtils;
 import com.example.bankingapplication.Utils.GlobalVariables;
 import com.example.bankingapplication.Utils.NumberFormat;
+import com.example.bankingapplication.Utils.VnPayUtils;
 
 import java.util.Locale;
 
@@ -56,6 +57,7 @@ public class ConfirmRechargePhoneActivity extends AppCompatActivity {
     private int[] resendDelaysSeconds = {15, 20, 30, 50, 90}; // Sequence: 15s, then 15+5, then 20+10, then 30+20, then 50+40
     private int currentResendAttempt = 0;
     private boolean isOtpExpired = false;
+    String amount = "";
     private String currentOtp;
     private long otpExpiryTimestamp; // thời gian OTP hết hạn tính bằng milliseconds
 
@@ -81,22 +83,32 @@ public class ConfirmRechargePhoneActivity extends AppCompatActivity {
         tvCarrier = findViewById(R.id.tvCarrier);
 
 
-        // Nhận dữ liệu từ Intent
-        Intent intent = getIntent();
-        String phoneNumber = intent.getStringExtra("phoneNumber");
-        String amount = intent.getStringExtra("amount");
-        tvCarrier.setText(intent.getStringExtra("carrier")); // nếu có truyền thêm carrier
+//        // Nhận dữ liệu từ Intent
+//        Intent intent = getIntent();
+//        String phoneNumber = intent.getStringExtra("phoneNumber");
+//        amount = intent.getStringExtra("amount");
+//        tvCarrier.setText(intent.getStringExtra("carrier")); // nếu có truyền thêm carrier
+//
+//        // Populate data (in a real app, this would come from previous activity/API)
+//        User user = GlobalVariables.getInstance().getCurrentUser();
+//        Account account = GlobalVariables.getInstance().getCurrentAccount();
+//        tvSourceAccount.setText(account.getAccountNumber());
+//        tvPhoneNumber.setText(phoneNumber);
+//        tvAmount.setText(NumberFormat.convertToCurrencyFormatOnlyNumber(Integer.parseInt(amount)));
+//        userEmail = user.getEmail();
 
-        // Populate data (in a real app, this would come from previous activity/API)
-        User user = GlobalVariables.getInstance().getCurrentUser();
-        Account account = GlobalVariables.getInstance().getCurrentAccount();
-
-
-        tvSourceAccount.setText(account.getAccountNumber());
+//        Demo
+        String phoneNumber = "0908871318";
+        amount = "1000000"; // ví dụ số tiền nạp
+        String carrier = "Viettel";
+        tvCarrier.setText(carrier); // nếu có truyền thêm carrier
+        tvSourceAccount.setText("123456789"); // ví dụ số tài khoản
         tvPhoneNumber.setText(phoneNumber);
-        assert amount != null;
         tvAmount.setText(NumberFormat.convertToCurrencyFormatOnlyNumber(Integer.parseInt(amount)));
-        userEmail = user.getEmail();
+        userEmail = "triettrinhthinh@gmail.com"; // ví dụ email người dùng
+
+
+
 
         btnConfirmMain.setOnClickListener(v -> showOtpDialog());
     }
@@ -264,6 +276,12 @@ public class ConfirmRechargePhoneActivity extends AppCompatActivity {
         if (enteredOtp.equals(currentOtp)) {
             Toast.makeText(this, getString(R.string.otp_verification_success), Toast.LENGTH_SHORT).show();
             cancelTimers();
+            // Xử lý logic xác thực thành công ở đây
+            String orderId = String.valueOf("Transaction_" + System.currentTimeMillis()); // Mã đơn hàng duy nhất
+            String paymentUrl = VnPayUtils.createPaymentUrl(Integer.parseInt(amount), "Nạp tiền điện thoại", orderId);
+            Log.d("VNPAY_URL", "Payment URL: " + paymentUrl);
+
+            launchVnPayUrl(paymentUrl);
             if (otpDialog != null && otpDialog.isShowing()) {
                 otpDialog.dismiss();
             }
@@ -271,6 +289,32 @@ public class ConfirmRechargePhoneActivity extends AppCompatActivity {
         } else {
             Toast.makeText(this, getString(R.string.otp_verification_failed), Toast.LENGTH_SHORT).show();
             if(pinViewOtp != null) pinViewOtp.setText(""); // Clear OTP on failure
+        }
+    }
+
+    private void launchVnPayUrl(String paymentUrl) {
+        try {
+            // Log payment URL for debugging
+            Log.d(TAG, "Launching VNPAY URL with WebViewPaymentActivity: " + paymentUrl);
+            
+            // Create intent for WebViewPaymentActivity
+            Intent intent = new Intent(this, WebViewPaymentActivity.class);
+            
+            // Pass the payment URL to the WebViewPaymentActivity
+            intent.putExtra("paymentUrl", paymentUrl);
+            
+            // Optionally pass transaction details
+            intent.putExtra("transactionType", "PHONE_RECHARGE");
+            intent.putExtra("amount", amount);
+            intent.putExtra("phoneNumber", tvPhoneNumber.getText().toString());
+            
+            // Start the WebViewPaymentActivity
+            startActivity(intent);
+            
+            Log.d(TAG, "Successfully launched WebViewPaymentActivity");
+        } catch (Exception e) {
+            Log.e(TAG, "Error launching WebViewPaymentActivity", e);
+            Toast.makeText(this, "Không thể mở trang thanh toán. Vui lòng thử lại sau.", Toast.LENGTH_SHORT).show();
         }
     }
 

@@ -22,24 +22,24 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.BankingApplication"
+        android:usesCleartextTraffic="true"
         tools:ignore="LockedOrientationActivity"
         tools:targetApi="31">
+
         <activity
-            android:name=".SignInActivity"
-            android:exported="true" >
+            android:name=".ConfirmRechargePhoneActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
 
-        <intent-filter>
-            <action android:name="android.intent.action.MAIN" />
-
-            <category android:name="android.intent.category.LAUNCHER" />
-        </intent-filter>
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
         </activity>
-
         <activity
             android:name=".RechargePhoneActivity"
             android:exported="false" />
         <activity
-            android:name=".ConfirmRechargePhoneActivity"
+            android:name=".SignInActivity"
             android:exported="false" />
         <activity
             android:name=".BankOfficerMainActivity"
@@ -66,12 +66,26 @@
             android:screenOrientation="unspecified" />
         <activity
             android:name=".AccountActivity"
-            android:exported="false">
-        </activity>
+            android:exported="false"/>
         <activity
             android:name=".CustomerMainActivity"
             android:exported="true"
             android:screenOrientation="portrait" />
+        <activity
+            android:name=".WebViewPaymentActivity"
+            android:exported="false"
+            android:configChanges="orientation|screenSize" />
+        <activity
+            android:name=".PaymentReturnActivity"
+            android:exported="true"
+            android:launchMode="singleTask"> <!-- singleTask hoặc singleTop để tránh tạo nhiều instance -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <!-- Quan trọng: scheme và host phải khớp với vnp_ReturnUrl đã khai báo -->
+                <data android:scheme="myapp" android:host="vnpayresponse" />
+            </intent-filter>
+        </activity>
     </application>
-
 </manifest>
