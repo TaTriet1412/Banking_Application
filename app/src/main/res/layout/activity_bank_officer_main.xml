@@ -5,6 +5,38 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:fitsSystemWindows="true"
     tools:context=".BankOfficerMainActivity">
+
+    <FrameLayout
+        android:id="@+id/frame_container_officer"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toTopOf="@+id/bottom_navigation_officer"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintEnd_toEndOf="parent" />
+
+    <com.google.android.material.bottomnavigation.BottomNavigationView
+        android:id="@+id/bottom_navigation_officer"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:minHeight="55dp"
+        android:background="@drawable/bg_navigation"
+        android:paddingHorizontal="8dp"
+        android:paddingVertical="8dp"
+        app:itemPaddingTop="8dp"
+        app:itemPaddingBottom="8dp"
+        android:layout_marginStart="@dimen/staff_screen_padding_horizontal"
+        android:layout_marginEnd="@dimen/staff_screen_padding_horizontal"
+        android:layout_marginBottom="@dimen/staff_screen_padding_vertical"
+        app:itemBackground="@drawable/bottom_nav_item_background_selector"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:labelVisibilityMode="labeled"
+        app:itemIconTint="@null"
+    app:itemTextColor="@color/bottom_nav_text_inactive"
+    app:menu="@menu/navigation_menu" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

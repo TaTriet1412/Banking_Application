@@ -9,6 +9,8 @@ import com.example.bankingapplication.Object.User;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -22,6 +24,22 @@ public class Firestore {
     public interface FirestoreGetUserCallback {
         void onCallback(User user);
     }
+
+    public interface FirestoreGetCustomersCallback {
+        void onCallback(List<User> customerList, Exception e);
+    }
+
+    // Interface cho việc lấy danh sách Accounts của một User
+    public interface FirestoreGetAccountsByUserIdCallback {
+        void onCallback(List<Account> accountList, Exception e);
+    }
+
+    // Interface cho kết quả của một hành động CẬP NHẬT (update/set/delete)
+    public interface FirestoreUpdateCallback {
+        void onCallback(boolean isSuccess, Exception e);
+    }
+
+
 
     public static void getUser(String UID, FirestoreGetUserCallback callback) {
         db.collection("users")
@@ -342,4 +360,88 @@ public class Firestore {
         void onCallback(Bill bill);
     }
 
+    public static void getAllCustomers(FirestoreGetCustomersCallback callback) {
+        db.collection("users")
+                .whereEqualTo("role", "customer") // Lọc những user có role là "customer"
+                .get()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        List<User> customerList = new ArrayList<>();
+                        QuerySnapshot querySnapshot = task.getResult();
+                        if (querySnapshot != null) {
+                            for (QueryDocumentSnapshot document : querySnapshot) {
+                                User user = document.toObject(User.class);
+                                user.setUID(document.getId()); // Gán UID từ ID của document
+                                customerList.add(user);
+                            }
+                            callback.onCallback(customerList, null);
+                        } else {
+                            callback.onCallback(new ArrayList<>(), new Exception("QuerySnapshot is null"));
+                        }
+                    } else {
+                        Log.e("Firestore", "Error getting customer documents: ", task.getException());
+                        callback.onCallback(new ArrayList<>(), task.getException());
+                    }
+                });
+    }
+
+    public static void getAccountsByUserId(String userId, FirestoreGetAccountsByUserIdCallback callback) {
+        db.collection("accounts")
+                .whereEqualTo("userId", userId) // Lọc các tài khoản theo userId
+                .get()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        List<Account> accountList = new ArrayList<>();
+                        QuerySnapshot querySnapshot = task.getResult();
+                        if (querySnapshot != null) {
+                            for (QueryDocumentSnapshot document : querySnapshot) {
+                                Account account = document.toObject(Account.class);
+                                account.setUID(document.getId()); // Gán UID từ ID của document tài khoản
+                                accountList.add(account);
+                            }
+                            callback.onCallback(accountList, null);
+                        } else {
+                            callback.onCallback(new ArrayList<>(), new Exception("QuerySnapshot is null for accounts"));
+                        }
+                    } else {
+                        Log.e("Firestore", "Error getting account documents for user " + userId + ": ", task.getException());
+                        callback.onCallback(new ArrayList<>(), task.getException());
+                    }
+                });
+    }
+
+    public static void updateUserFields(String userId, Map<String, Object> fieldsToUpdate, FirestoreUpdateCallback callback) {
+        if (userId == null || userId.isEmpty() || fieldsToUpdate == null || fieldsToUpdate.isEmpty()) {
+            if (callback != null) callback.onCallback(false, new IllegalArgumentException("User ID or fields to update cannot be empty."));
+            return;
+        }
+        db.collection("users").document(userId)
+                .update(fieldsToUpdate)
+                .addOnSuccessListener(aVoid -> {
+                    Log.d("Firestore", "User " + userId + " successfully updated!");
+                    if (callback != null) callback.onCallback(true, null);
+                })
+                .addOnFailureListener(e -> {
+                    Log.w("Firestore", "Error updating user " + userId, e);
+                    if (callback != null) callback.onCallback(false, e);
+                });
+    }
+
+    public static void updateAccountFields(String accountId, Map<String, Object> fieldsToUpdate, FirestoreUpdateCallback callback) {
+        // ... (code tương tự như updateUserFields, nhưng cho collection "accounts") ...
+        if (accountId == null || accountId.isEmpty() || fieldsToUpdate == null || fieldsToUpdate.isEmpty()) {
+            if (callback != null) callback.onCallback(false, new IllegalArgumentException("Account ID or fields to update cannot be empty."));
+            return;
+        }
+        db.collection("accounts").document(accountId)
+                .update(fieldsToUpdate)
+                .addOnSuccessListener(aVoid -> {
+                    Log.d("Firestore", "Account " + accountId + " successfully updated!");
+                    if (callback != null) callback.onCallback(true, null);
+                })
+                .addOnFailureListener(e -> {
+                    Log.w("Firestore", "Error updating account " + accountId, e);
+                    if (callback != null) callback.onCallback(false, e);
+                });
+    }
 }

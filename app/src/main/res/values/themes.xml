@@ -77,9 +77,51 @@
         <item name="android:paddingBottom">15dp</item>
     </style>
 
+    <style name="OfficerProfileLabel" parent="Widget.AppCompat.TextView">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginTop">@dimen/staff_profile_field_margin_top</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">?android:attr/textColorSecondary</item>
+        <item name="android:textSize">14sp</item>
+    </style>
+
+    <style name="MyCustomBottomNavStyle" parent="Widget.Material3.BottomNavigationView"> <!-- Hoặc parent tương ứng -->
+        <item name="itemIconTint">@null</item>
+        <!-- Các thuộc tính khác -->
+    </style>
+
+    <style name="OfficerProfileValue" parent="Widget.AppCompat.TextView">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textSize">16sp</item>
+        <item name="android:textColor">?android:attr/textColorPrimary</item>
+        <item name="android:layout_marginStart">@dimen/staff_profile_field_value_margin_start</item>
+
+    </style>
+
     <style name="Circle">
         <item name="cornerFamily">rounded</item>
         <item name="cornerSize">50%</item>
+    </style>
+
+    <style name="CustomerDetailLabel">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textColor">@android:color/white</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:layout_gravity">start|center_vertical</item>
+        <item name="android:layout_marginEnd">8dp</item>
+    </style>
+
+    <style name="CustomerDetailValue">
+        <item name="android:layout_width">0dp</item> <!-- Để nó co giãn -->
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textColor">@android:color/white</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:layout_gravity">fill_horizontal|center_vertical</item>
+        <item name="android:layout_columnWeight">1</item> <!-- Quan trọng -->
     </style>
 
 </resources>

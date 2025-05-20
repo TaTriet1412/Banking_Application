@@ -127,5 +127,12 @@
                 <data android:scheme="myapp" android:host="vnpayresponse" />
             </intent-filter>
         </activity>
+
+        <activity
+            android:name=".EditCustomerInfoActivity"
+            android:exported="false"
+            android:label="@string/title_activity_edit_customer_info"
+            android:parentActivityName=".BankOfficerMainActivity"
+            android:windowSoftInputMode="adjustResize" />
     </application>
 </manifest>

@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.core.widget.NestedScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fillViewport="true"
+    tools:context=".OfficerProfileFragment">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingHorizontal="@dimen/staff_screen_padding_horizontal"
+        android:paddingVertical="@dimen/staff_screen_padding_vertical">
+
+        <com.google.android.material.imageview.ShapeableImageView
+            android:id="@+id/imageOfficerAvatar"
+            android:layout_width="@dimen/staff_profile_avatar_size"
+            android:layout_height="@dimen/staff_profile_avatar_size"
+            android:layout_marginTop="@dimen/staff_profile_avatar_margin_top"
+            android:padding="@dimen/staff_profile_avatar_internal_padding"
+            android:src="@drawable/ic_user_placeholder_white"
+        app:shapeAppearanceOverlay="@style/ShapeAppearance.Material3.Corner.Full"
+        app:strokeColor="?attr/colorPrimary"
+        app:strokeWidth="@dimen/staff_profile_avatar_stroke_width"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:contentDescription="Officer Avatar"/>
+
+        <TextView
+            android:id="@+id/labelOfficerName"
+            style="@style/OfficerProfileLabel"
+            android:text="Tên nhân viên:"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/imageOfficerAvatar"/>
+        <TextView
+            android:id="@+id/textOfficerName"
+            style="@style/OfficerProfileValue"
+            tools:text="Lê Thị B"
+            app:layout_constraintStart_toEndOf="@id/guideline_officer_profile_vertical"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBaseline_toBaselineOf="@id/labelOfficerName"/>
+
+        <TextView
+            android:id="@+id/labelOfficerId"
+            style="@style/OfficerProfileLabel"
+            android:text="Mã nhân viên:"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/labelOfficerName"/>
+        <TextView
+            android:id="@+id/textOfficerId"
+            style="@style/OfficerProfileValue"
+            tools:text="NV00123"
+            app:layout_constraintStart_toEndOf="@id/guideline_officer_profile_vertical"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBaseline_toBaselineOf="@id/labelOfficerId"/>
+
+        <TextView
+            android:id="@+id/labelOfficerEmail"
+            style="@style/OfficerProfileLabel"
+            android:text="Email:"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/labelOfficerId"/>
+        <TextView
+            android:id="@+id/textOfficerEmail"
+            style="@style/OfficerProfileValue"
+            tools:text="lethib@bank.com"
+            app:layout_constraintStart_toEndOf="@id/guideline_officer_profile_vertical"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBaseline_toBaselineOf="@id/labelOfficerEmail"/>
+
+        <TextView
+            android:id="@+id/labelOfficerRole"
+            style="@style/OfficerProfileLabel"
+            android:text="Chức vụ:"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/labelOfficerEmail"/>
+        <TextView
+            android:id="@+id/textOfficerRole"
+            style="@style/OfficerProfileValue"
+            tools:text="Giao dịch viên"
+            app:layout_constraintStart_toEndOf="@id/guideline_officer_profile_vertical"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBaseline_toBaselineOf="@id/labelOfficerRole"/>
+
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/guideline_officer_profile_vertical"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintGuide_percent="0.4" /> <!-- Điều chỉnh % để label và value cách nhau hợp lý -->
+
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_edit_officer_profile"
+            style="@style/Widget.Material3.Button.OutlinedButton"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="Sửa thông tin cá nhân"
+            app:layout_constraintTop_toBottomOf="@id/textOfficerRole"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:layout_marginTop="32dp"/>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_logout_officer"
+            style="@style/Widget.Material3.Button"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="Đăng xuất"
+            app:backgroundTint="?attr/colorError"
+            android:textColor="?attr/colorOnError"
+            app:layout_constraintTop_toBottomOf="@id/btn_edit_officer_profile"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="16dp"/>
+
+        <ProgressBar
+            android:id="@+id/progressBar_officer_profile"
+            style="?android:attr/progressBarStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            tools:visibility="visible"/>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</androidx.core.widget.NestedScrollView>
