@@ -4,11 +4,8 @@
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
-
-    <!-- Quyền truy cập vị trí chính xác -->
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-    <!-- Quyền truy cập vị trí tương đối (dự phòng) -->
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" /> <!-- Quyền truy cập vị trí chính xác -->
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" /> <!-- Quyền truy cập vị trí tương đối (dự phòng) -->
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
 
     <uses-feature android:name="android.hardware.camera" />
@@ -33,7 +30,6 @@
 
         <activity
             android:name=".SignInActivity"
-            
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -41,19 +37,32 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
         <activity
             android:name=".NavigationActivity"
             android:exported="false" />
+
+        <activity
+            android:name=".PayElectricityBillActivity"
+            android:parentActivityName=".CustomerMainActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".CustomerMainActivity" />
+        </activity>
+        <activity
+            android:name=".ConfirmElectricityPaymentActivity"
+            android:exported="false"
+            android:parentActivityName=".PayElectricityBillActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".PayElectricityBillActivity" />
+        </activity>
+
         <activity
             android:name=".ConfirmRechargePhoneActivity"
-            android:exported="false"/>
-
-
+            android:exported="false" />
         <activity
             android:name=".RechargePhoneActivity"
             android:exported="false" />
- 
         <activity
             android:name=".ConfirmTransactionActivity"
             android:exported="false" />
@@ -64,11 +73,10 @@
             android:name=".BankOfficerMainActivity"
             android:exported="false" />
 
-
-
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="AIzaSyA6hT7klVvK35tmjh3W9UKF8JMhCBWs-Co" />
+
         <uses-native-library
             android:name="libOpenCL.so"
             android:required="false" />
@@ -83,8 +91,6 @@
                 android:resource="@xml/file_paths" />
         </provider>
 
-
-
         <activity
             android:name=".SignUpActivity"
             android:configChanges="orientation|screenSize"
@@ -92,21 +98,22 @@
             android:screenOrientation="unspecified" />
         <activity
             android:name=".AccountActivity"
-            android:exported="false"/>
+            android:exported="false" />
         <activity
             android:name=".CustomerMainActivity"
             android:exported="true"
             android:screenOrientation="portrait" />
         <activity
             android:name=".WebViewPaymentActivity"
-            android:exported="false"
-            android:configChanges="orientation|screenSize" />
+            android:configChanges="orientation|screenSize"
+            android:exported="false" />
         <activity
             android:name=".PaymentReturnActivity"
             android:exported="true"
             android:launchMode="singleTask"> <!-- singleTask hoặc singleTop để tránh tạo nhiều instance -->
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
+
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
                 <!-- Enable both http/https scheme handling for VNPay responses -->
@@ -115,7 +122,6 @@
                 <data android:scheme="http" />
             </intent-filter>
         </activity>
-
         <activity
             android:name=".EditCustomerInfoActivity"
             android:exported="false"
@@ -123,4 +129,5 @@
             android:parentActivityName=".BankOfficerMainActivity"
             android:windowSoftInputMode="adjustResize" />
     </application>
+
 </manifest>

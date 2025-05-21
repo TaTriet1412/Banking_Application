@@ -310,7 +310,7 @@
                     android:layout_columnWeight="1"
                     android:gravity="center_horizontal"
                     android:orientation="vertical"
-                    android:padding="8dp">
+                    android:padding="8dp"
                     android:clickable="true"
                     android:focusable="true"
                     android:background="?attr/selectableItemBackground">
@@ -356,6 +356,36 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="4dp"
                         android:text="Các phòng giao dịch gần nhất"
+                        android:textAlignment="center"
+                        android:textColor="@color/grey_text_dark"
+                        android:textSize="12sp" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/ll_pay_electricity_bill_feature"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_columnWeight="1"
+                    android:gravity="center_horizontal"
+                    android:orientation="vertical"
+                    android:padding="8dp"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:background="?attr/selectableItemBackground">
+
+                    <ImageView
+                        android:id="@+id/iv_electric_bill"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:src="@drawable/ic_credit_card"
+                        android:padding="8dp"
+                        android:background="@drawable/ic_feature_icon_bg_placeholder"
+                        android:contentDescription="Pay electricity bill"/>
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:text="Tiền điện"
                         android:textAlignment="center"
                         android:textColor="@color/grey_text_dark"
                         android:textSize="12sp" />
