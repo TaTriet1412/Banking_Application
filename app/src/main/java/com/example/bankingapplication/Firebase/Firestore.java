@@ -444,4 +444,86 @@ public class Firestore {
                     if (callback != null) callback.onCallback(false, e);
                 });
     }
+
+//    Thinh them phuong thuc de check bill tien dien
+    // Trong lớp Firestore.java
+
+    // Interface cho việc kiểm tra hóa đơn
+    public interface FirestoreCheckBillCallback {
+        void onCallback(boolean billExists, Exception e); // billExists là true nếu tìm thấy, false nếu không hoặc lỗi
+    }
+
+    public static void checkElectricityBillExists(String providerName, String billNumber,String type, FirestoreCheckBillCallback callback) {
+        if (providerName == null || providerName.isEmpty() || billNumber == null || billNumber.isEmpty() ||  type == null || type.isEmpty() ) {
+            Log.e("Firestore", "Provider name or bill number is empty in checkElectricityBillExists");
+            callback.onCallback(false, new IllegalArgumentException("Provider name or bill number cannot be empty."));
+            return;
+        }
+
+        // Đảm bảo tên collection và tên trường khớp với cấu trúc Firebase của bạn
+        // Ví dụ: collection "electricityBills", trường nhà cung cấp "provider", trường mã hóa đơn "billNumber"
+        db.collection("bills") // <<<< THAY "electricityBills" BẰNG TÊN COLLECTION HÓA ĐƠN ĐIỆN
+                .whereEqualTo("provider", providerName) // <<<< THAY "provider" BẰNG TÊN TRƯỜNG NHÀ CUNG CẤP
+                .whereEqualTo("billNumber", billNumber) // <<<< THAY "billNumber" BẰNG TÊN TRƯỜNG MÃ HÓA ĐƠN
+                .whereEqualTo("type", type)
+                .limit(1)
+                .get()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        QuerySnapshot querySnapshot = task.getResult();
+                        if (querySnapshot != null && !querySnapshot.isEmpty()) {
+                            // Tìm thấy ít nhất một hóa đơn khớp
+                            callback.onCallback(true, null);
+                        } else {
+                            // Không tìm thấy hóa đơn nào khớp
+                            callback.onCallback(false, null);
+                        }
+                    } else {
+                        // Lỗi khi thực hiện truy vấn
+                        Log.e("Firestore", "Error checking electricity bill: ", task.getException());
+                        callback.onCallback(false, task.getException());
+                    }
+                });
+    }
+
+    // Interface cho việc lấy một hóa đơn cụ thể (có thể là null nếu không tìm thấy)
+    public interface FirestoreGetSingleBillCallback {
+        void onCallback(Bill bill, Exception e); // bill có thể là null
+    }
+
+    // Phương thức mới để lấy hóa đơn điện dựa trên billNumber và provider
+    public static void getElectricityBillByDetails(String providerName, String billNumber, String type, FirestoreGetSingleBillCallback callback) {
+        if (providerName == null || providerName.isEmpty() || billNumber == null || billNumber.isEmpty()) {
+            Log.e("Firestore", "Provider name or bill number is empty in getElectricityBillByDetails");
+            callback.onCallback(null, new IllegalArgumentException("Provider name or bill number cannot be empty."));
+            return;
+        }
+
+        db.collection("bills") //
+                .whereEqualTo("provider", providerName)
+                .whereEqualTo("billNumber", billNumber)
+                .whereEqualTo("type", type)
+                .limit(1)
+                .get()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        QuerySnapshot querySnapshot = task.getResult();
+                        if (querySnapshot != null && !querySnapshot.isEmpty()) {
+                            DocumentSnapshot document = querySnapshot.getDocuments().get(0);
+                            Bill bill = document.toObject(Bill.class);
+                            if (bill != null) {
+                                bill.setUID(document.getId());
+                            }
+                            callback.onCallback(bill, null);
+                        } else {
+                            // Không tìm thấy hóa đơn nào khớp
+                            callback.onCallback(null, null);
+                        }
+                    } else {
+                        // Lỗi khi thực hiện truy vấn
+                        Log.e("Firestore", "Error getting electricity bill by details: ", task.getException());
+                        callback.onCallback(null, task.getException());
+                    }
+                });
+    }
 }
