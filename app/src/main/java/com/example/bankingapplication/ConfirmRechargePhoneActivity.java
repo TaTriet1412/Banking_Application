@@ -1,5 +1,6 @@
 package com.example.bankingapplication;
 
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
@@ -13,6 +14,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.TextView;
@@ -22,7 +24,7 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
-import com.chaos.view.PinView; // Import PinView
+import com.chaos.view.PinView;
 import com.example.bankingapplication.Firebase.Firestore;
 import com.example.bankingapplication.Object.Account;
 import com.example.bankingapplication.Object.Bill;
@@ -42,6 +44,15 @@ public class ConfirmRechargePhoneActivity extends AppCompatActivity {
     private Button btnConfirmMain;
     private TextView tvSourceAccount, tvPhoneNumber, tvTransactionFee, tvAmount, tvAmountInWords, tvAuthMethod;
 
+    // PIN Dialog
+    private AlertDialog pinDialog;
+    private PinView pinViewPin;
+    private TextView tvPinMessage;
+    private Button btnVerifyPin;
+    private ImageButton btnClosePinDialog;
+    private static final String DEFAULT_PIN = "123456"; // This should be from user settings or secure storage
+
+    // OTP Dialog
     private AlertDialog otpDialog;
     private PinView pinViewOtp;
     private TextView tvOtpMessage, tvResendOtp, tvCarrier;
@@ -82,35 +93,109 @@ public class ConfirmRechargePhoneActivity extends AppCompatActivity {
         btnConfirmMain = findViewById(R.id.btnConfirm);
         tvCarrier = findViewById(R.id.tvCarrier);
 
-
         // Nhận dữ liệu từ Intent
         Intent intent = getIntent();
         String phoneNumber = intent.getStringExtra("phoneNumber");
         amount = intent.getStringExtra("amount");
         tvCarrier.setText(intent.getStringExtra("carrier")); // nếu có truyền thêm carrier
 
-        // Populate data (in a real app, this would come from previous activity/API)
+        // Get user and account data from GlobalVariables with null checks
         User user = GlobalVariables.getInstance().getCurrentUser();
         Account account = GlobalVariables.getInstance().getCurrentAccount();
+        
+        // Check if user and account data is available
+        if (user == null || account == null) {
+            // Handle the case when user or account data is missing
+            Toast.makeText(this, "Không thể tải thông tin tài khoản. Vui lòng đăng nhập lại.", Toast.LENGTH_LONG).show();
+            
+            // Redirect to sign in activity or previous screen
+            finish();
+            Intent signInIntent = new Intent(this, SignInActivity.class);
+            signInIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            startActivity(signInIntent);
+            return;
+        }
+        
+        // If we get here, we have valid user and account objects
         tvSourceAccount.setText(account.getAccountNumber());
         tvPhoneNumber.setText(phoneNumber);
         tvAmount.setText(NumberFormat.convertToCurrencyFormatOnlyNumber(Integer.parseInt(amount)));
         userEmail = user.getEmail();
 
-////        Demo
-//        String phoneNumber = "0908871318";
-//        amount = "1000000"; // ví dụ số tiền nạp
-//        String carrier = "Viettel";
-//        tvCarrier.setText(carrier); // nếu có truyền thêm carrier
-//        tvSourceAccount.setText("123456789"); // ví dụ số tài khoản
-//        tvPhoneNumber.setText(phoneNumber);
-//        tvAmount.setText(NumberFormat.convertToCurrencyFormatOnlyNumber(Integer.parseInt(amount)));
-//        userEmail = "triettrinhthinh@gmail.com"; // ví dụ email người dùng
+        btnConfirmMain.setOnClickListener(v -> showPinDialog());
+    }
 
+    private void showPinDialog() {
+        if (pinDialog != null && pinDialog.isShowing()) {
+            return;
+        }
 
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        LayoutInflater inflater = this.getLayoutInflater();
+        View dialogView = inflater.inflate(R.layout.dialog_pin_verification, null);
+        builder.setView(dialogView);
+        builder.setCancelable(false); // User must interact with dialog
 
+        pinDialog = builder.create();
+        if (pinDialog.getWindow() != null) {
+            pinDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        }
 
-        btnConfirmMain.setOnClickListener(v -> showOtpDialog());
+        tvPinMessage = dialogView.findViewById(R.id.tvPinMessage);
+        pinViewPin = dialogView.findViewById(R.id.pinViewPin);
+        btnVerifyPin = dialogView.findViewById(R.id.btnVerifyPin);
+        btnClosePinDialog = dialogView.findViewById(R.id.btnCloseDialog);
+
+        tvPinMessage.setText("Nhập mã PIN của bạn");
+
+        // Make sure PinView is ready to accept input
+        pinViewPin.requestFocus();
+        
+        // Show keyboard automatically
+        if (getWindow() != null && getWindow().getContext() != null) {
+            InputMethodManager imm = (InputMethodManager) getWindow().getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+            if (imm != null) {
+                // Post a delayed action to make sure the dialog is shown before trying to show the keyboard
+                new Handler().postDelayed(() -> 
+                    imm.showSoftInput(pinViewPin, InputMethodManager.SHOW_IMPLICIT), 
+                    100);
+            }
+        }
+
+        // Monitor input changes to enable/disable the verify button
+        pinViewPin.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                btnVerifyPin.setEnabled(s.length() == pinViewPin.getItemCount());
+            }
+            @Override
+            public void afterTextChanged(Editable s) {}
+        });
+        btnVerifyPin.setEnabled(false); // Initially disable until all digits are entered
+
+        btnClosePinDialog.setOnClickListener(v -> pinDialog.dismiss());
+
+        btnVerifyPin.setOnClickListener(v -> verifyPin());
+
+        pinDialog.show();
+    }
+
+    private void verifyPin() {
+        String enteredPin = pinViewPin.getText().toString();
+        
+        // In production, this would verify against user's actual PIN from secure storage
+        if (enteredPin.equals(DEFAULT_PIN)) {
+            Toast.makeText(this, "Mã PIN hợp lệ", Toast.LENGTH_SHORT).show();
+            pinDialog.dismiss();
+            
+            // Now show OTP dialog after PIN is verified
+            showOtpDialog();
+        } else {
+            Toast.makeText(this, "Mã PIN không đúng, vui lòng thử lại", Toast.LENGTH_SHORT).show();
+            pinViewPin.setText("");
+        }
     }
 
     private void showOtpDialog() {
@@ -194,9 +279,6 @@ public class ConfirmRechargePhoneActivity extends AppCompatActivity {
         startResendOtpCooldown();
     }
 
-
-
-
     private void handleResendOtp() {
         if (tvResendOtp.isEnabled()) {
             cancelTimers(); // Cancel existing timers before sending new OTP
@@ -230,7 +312,6 @@ public class ConfirmRechargePhoneActivity extends AppCompatActivity {
         int otp = 100000 + new java.util.Random().nextInt(900000); // random từ 100000 -> 999999
         return String.valueOf(otp);
     }
-
 
     private long getCurrentResendDelay() {
         int index = Math.min(currentResendAttempt, resendDelaysSeconds.length - 1);
@@ -277,14 +358,76 @@ public class ConfirmRechargePhoneActivity extends AppCompatActivity {
             Toast.makeText(this, getString(R.string.otp_verification_success), Toast.LENGTH_SHORT).show();
             cancelTimers();
 
-            createBill();
+            // Kiểm tra số dư tài khoản trước khi tiếp tục
+            checkAccountBalance();
         } else {
             Toast.makeText(this, getString(R.string.otp_verification_failed), Toast.LENGTH_SHORT).show();
             if(pinViewOtp != null) pinViewOtp.setText(""); // Clear OTP on failure
         }
     }
 
+    private void checkAccountBalance() {
+        Account currentAccount = GlobalVariables.getInstance().getCurrentAccount();
+        
+        // Add null check for account
+        if (currentAccount == null) {
+            Toast.makeText(this, "Không thể tải thông tin tài khoản. Vui lòng đăng nhập lại.", Toast.LENGTH_LONG).show();
+            if (otpDialog != null && otpDialog.isShowing()) {
+                otpDialog.dismiss();
+            }
+            finish();
+            return;
+        }
+        
+        int amountValue = Integer.parseInt(amount);
+        
+        // Kiểm tra số dư của tài khoản checking
+        if (currentAccount.getChecking() != null && currentAccount.getChecking().getBalance() != null) {
+            int currentBalance = currentAccount.getChecking().getBalance();
+            
+            if (currentBalance >= amountValue) {
+                // Đủ số dư, tiếp tục tạo bill và giao dịch
+                createBill();
+            } else {
+                // Không đủ số dư, hiển thị thông báo
+                showInsufficientBalanceDialog(currentBalance, amountValue);
+                
+                if (otpDialog != null && otpDialog.isShowing()) {
+                    otpDialog.dismiss();
+                }
+            }
+        } else {
+            // Lỗi khi đọc số dư
+            Toast.makeText(this, "Không thể kiểm tra số dư tài khoản. Vui lòng thử lại sau.", 
+                    Toast.LENGTH_SHORT).show();
+            
+            if (otpDialog != null && otpDialog.isShowing()) {
+                otpDialog.dismiss();
+            }
+        }
+    }
+    
+    private void showInsufficientBalanceDialog(int currentBalance, int requiredAmount) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Số dư không đủ");
+        builder.setMessage("Số dư hiện tại: " + NumberFormat.convertToCurrencyFormatHasUnit(currentBalance) + 
+                "\nSố tiền cần thanh toán: " + NumberFormat.convertToCurrencyFormatHasUnit(requiredAmount));
+        builder.setPositiveButton("Đóng", (dialog, which) -> dialog.dismiss());
+        builder.show();
+    }
+
     private void createBill() {
+        // Add null check for currentUser
+        User currentUser = GlobalVariables.getInstance().getCurrentUser();
+        if (currentUser == null) {
+            Toast.makeText(this, "Không thể tải thông tin người dùng. Vui lòng đăng nhập lại.", Toast.LENGTH_LONG).show();
+            if (otpDialog != null && otpDialog.isShowing()) {
+                otpDialog.dismiss();
+            }
+            finish();
+            return;
+        }
+        
         Bill bill = new Bill(
                 Firestore.generateId("BI"), // UID will be generated by Firestore
                 null, // Transaction ID (if applicable)
@@ -294,7 +437,7 @@ public class ConfirmRechargePhoneActivity extends AppCompatActivity {
                 null, // Bill number (if applicable)
                 tvCarrier.getText().toString(), // Provider from the UI
                 "phone", // Type of the bill
-                GlobalVariables.getInstance().getCurrentUser().getUID() // User ID from global variables
+                currentUser.getUID() // User ID from global variables
         );
         Firestore.addEditBill(bill, new Firestore.FirestoreAddCallback() {
             @Override
@@ -311,6 +454,14 @@ public class ConfirmRechargePhoneActivity extends AppCompatActivity {
     }
 
     private void createTransaction(Bill bill) {
+        // Add null check for account
+        Account currentAccount = GlobalVariables.getInstance().getCurrentAccount();
+        if (currentAccount == null) {
+            Toast.makeText(this, "Không thể tải thông tin tài khoản. Vui lòng đăng nhập lại.", Toast.LENGTH_LONG).show();
+            finish();
+            return;
+        }
+        
         TransactionData transactionData = new TransactionData(
                 Firestore.generateId("TR"), // UID will be generated by Firestore
                 Integer.parseInt(amount), // Amount from the UI
@@ -318,7 +469,7 @@ public class ConfirmRechargePhoneActivity extends AppCompatActivity {
                 "pending", // Status of the transaction
                 "Nạp tiền ĐT " + tvPhoneNumber.getText().toString(), // Description
                 Timestamp.now(),
-                GlobalVariables.getInstance().getCurrentAccount().getUID() // Account UID
+                currentAccount.getUID() // Account UID
         );
         Firestore.addEditTransaction(transactionData, new Firestore.FirestoreAddCallback() {
             @Override
@@ -415,13 +566,17 @@ public class ConfirmRechargePhoneActivity extends AppCompatActivity {
         if (otpDialog != null && otpDialog.isShowing()) {
             otpDialog.dismiss();
         }
+        if (pinDialog != null && pinDialog.isShowing()) {
+            pinDialog.dismiss();
+        }
     }
 
     @Override
     public void onBackPressed() {
-        if (otpDialog != null && otpDialog.isShowing()) {
-            // Let user close dialog with X button or explicitly handle back press for dialog
-            Toast.makeText(this, "Please complete or cancel OTP verification.", Toast.LENGTH_SHORT).show();
+        if (pinDialog != null && pinDialog.isShowing()) {
+            Toast.makeText(this, "Vui lòng hoàn thành hoặc hủy xác thực PIN.", Toast.LENGTH_SHORT).show();
+        } else if (otpDialog != null && otpDialog.isShowing()) {
+            Toast.makeText(this, "Vui lòng hoàn thành hoặc hủy xác thực OTP.", Toast.LENGTH_SHORT).show();
         } else {
             super.onBackPressed();
         }

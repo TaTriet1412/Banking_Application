@@ -3,6 +3,7 @@ package com.example.bankingapplication;
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.MenuItem;
@@ -13,6 +14,7 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -114,6 +116,65 @@ public class WebViewPaymentActivity extends AppCompatActivity {
                 
                 return super.shouldOverrideUrlLoading(view, request);
             }
+
+            private WebViewClient webViewClient = new WebViewClient() {
+                @Override
+                public boolean shouldOverrideUrlLoading(WebView view, String url) {
+                    Log.d(TAG, "Loading URL: " + url);
+
+                    // Check if the URL is the return URL from VNPAY
+                    if (url.startsWith("myapp://vnpayresponse")) {
+                        Log.d(TAG, "VNPay return URL detected: " + url);
+                        
+                        try {
+                            // Parse the URL to extract the query parameters
+                            Uri uri = Uri.parse(url);
+                            
+                            // Create an intent to pass the data to PaymentReturnActivity
+                            Intent intent = new Intent(WebViewPaymentActivity.this, PaymentReturnActivity.class);
+                            intent.setData(uri);
+                            
+                            // Start the activity
+                            startActivity(intent);
+                            
+                            // Close this WebView activity
+                            finish();
+                            
+                            // Return true to indicate we've handled this URL
+                            return true;
+                        } catch (Exception e) {
+                            Log.e(TAG, "Error processing VNPay return URL", e);
+                            // If there's an error, let WebView handle it
+                            return false;
+                        }
+                    }
+                    
+                    // Let WebView handle all other URLs
+                    return false;
+                }
+                
+                @Override
+                public void onPageFinished(WebView view, String url) {
+                    super.onPageFinished(view, url);
+                    Log.d(TAG, "Page finished loading: " + url);
+                    
+                    // Hide loading indicator when page is loaded
+                    progressBar.setVisibility(View.GONE);
+                }
+                
+                @Override
+                public void onReceivedError(WebView view, int errorCode, String description, String failingUrl) {
+                    super.onReceivedError(view, errorCode, description, failingUrl);
+                    Log.e(TAG, "Error loading page: " + description);
+                    
+                    // Show error message to user
+                    Toast.makeText(WebViewPaymentActivity.this, 
+                            "Lỗi kết nối: " + description, Toast.LENGTH_LONG).show();
+                    
+                    // Hide loading indicator
+                    progressBar.setVisibility(View.GONE);
+                }
+            };
         });
         
         // Load the payment URL

@@ -11,11 +11,14 @@ public class Account {
     private SavingAccount saving;
     private MortgageAccount mortgage;
     private transient Timestamp  createdAt;
+    private String pinCode;
 
     public Account() {
     }
 
-    public Account(String UID, String accountNumber, String userId, String status, CheckingAccount checking, SavingAccount saving, MortgageAccount mortgage, Timestamp createdAt) {
+    public Account(String UID, String accountNumber, String userId, String status,
+                   CheckingAccount checking, SavingAccount saving, MortgageAccount mortgage,
+                   Timestamp createdAt, String pinCode) {
         this.UID = UID;
         this.accountNumber = accountNumber;
         this.userId = userId;
@@ -24,6 +27,15 @@ public class Account {
         this.saving = saving;
         this.mortgage = mortgage;
         this.createdAt = createdAt;
+        this.pinCode = pinCode;
+    }
+
+    public String getPinCode() {
+        return pinCode;
+    }
+
+    public void setPinCode(String pinCode) {
+        this.pinCode = pinCode;
     }
 
     public String getUID() {
