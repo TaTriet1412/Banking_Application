@@ -46,6 +46,23 @@
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
 
+                <!-- Thêm nút đăng xuất ở góc phải của header -->
+                <ImageView
+                    android:id="@+id/iv_customer_logout"
+                    android:layout_width="28dp"
+                    android:layout_height="28dp"
+                    android:layout_marginTop="32dp"
+                    android:layout_marginEnd="16dp"
+                    android:src="@drawable/ic_logout"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:padding="2dp"
+                    app:tint="@color/white"
+                    android:contentDescription="Đăng xuất"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
                 <!-- Thẻ thông tin tài khoản -->
                 <androidx.cardview.widget.CardView
                     android:id="@+id/account_info_card"
@@ -393,6 +410,7 @@
             </GridLayout>
 
             </LinearLayout>
+
         </LinearLayout>
     </ScrollView>
     <include layout="@layout/progress_overlay"/>

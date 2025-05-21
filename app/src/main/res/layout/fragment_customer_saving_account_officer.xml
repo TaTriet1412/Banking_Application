@@ -54,86 +54,67 @@
             android:orientation="vertical"
             android:padding="16dp">
 
+            <!-- Số dư tài khoản tiết kiệm -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
-                android:gravity="center_vertical">
+                android:layout_marginBottom="8dp">
 
                 <TextView
-                    android:layout_width="wrap_content"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:text="Số tiền tiết kiệm"
-                    android:textColor="@color/grey_text_dark"
-                    android:textSize="14sp"/>
+                    android:layout_weight="1"
+                    android:text="Số dư tài khoản tiết kiệm"
+                    android:textColor="@color/text_grey_label"
+                    android:textSize="14sp" />
 
                 <TextView
                     android:id="@+id/tv_officer_saving_balance"
-                    android:layout_width="0dp"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:layout_marginStart="16dp"
-                    tools:text="1.000.000 VNĐ"
-                    android:textColor="@android:color/black"
+                    tools:text="500.000 VNĐ"
+                    android:textColor="@color/text_dark"
                     android:textSize="16sp"
-                    android:textStyle="bold"
-                    android:gravity="end"/>
+                    android:textStyle="bold" />
             </LinearLayout>
 
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:background="?android:attr/listDivider"
-                android:layout_marginTop="12dp"
-                android:layout_marginBottom="12dp"/>
-
+            <!-- Lãi suất hiện tại -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
-                android:gravity="center_vertical">
+                android:layout_marginBottom="8dp">
 
                 <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Lãi suất"
-                    android:textColor="@color/grey_text_dark"
-                    android:textSize="14sp"/>
-
-                <TextView
-                    android:id="@+id/tv_officer_saving_interest_rate"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:layout_marginStart="16dp"
-                    tools:text="0.1 %"
-                    android:textColor="@android:color/black"
+                    android:text="Lãi suất hiện tại"
+                    android:textColor="@color/text_grey_label"
+                    android:textSize="14sp" />
+
+                <TextView
+                    android:id="@+id/tv_officer_saving_interest_rate"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    tools:text="5.5 %"
+                    android:textColor="@color/text_dark"
                     android:textSize="16sp"
-                    android:textStyle="bold"
-                    android:gravity="end"/>
+                    android:textStyle="bold" />
             </LinearLayout>
 
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btn_officer_edit_saving_interest_rate"
-                style="@style/Widget.MaterialComponents.Button.TextButton"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Sửa Lãi Suất"
-                android:layout_gravity="end"
-                android:layout_marginTop="8dp"/>
-
 
             <com.google.android.material.button.MaterialButton
-                android:id="@+id/btn_officer_saving_account_indicator"
+                android:id="@+id/btn_officer_mortgage_details_indicator"
                 style="@style/Widget.MaterialComponents.Button.TextButton"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="Tài khoản tiết kiệm"
                 android:layout_marginTop="16dp"
-                android:backgroundTint="@color/light_blue_background"
-                android:textColor="@color/dark_blue_text"
-                android:enabled="false"/>
+                android:enabled="false"
+                android:backgroundTint="@color/light_orange_background"
+                android:textColor="@color/dark_orange_text" />
         </LinearLayout>
     </com.google.android.material.card.MaterialCardView>
-
 </LinearLayout>

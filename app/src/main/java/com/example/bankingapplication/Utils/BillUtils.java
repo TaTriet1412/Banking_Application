@@ -6,6 +6,8 @@ public class BillUtils {
         if (type == null) return "Không xác định";
 
         switch (type.toLowerCase()) {
+            case "transfer":
+                return "Chuyển khoản";
             case "electricity":
                 return "Hóa đơn điện";
             case "water":

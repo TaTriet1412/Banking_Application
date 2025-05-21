@@ -1,6 +1,7 @@
 package com.example.bankingapplication;
 
 import android.annotation.SuppressLint;
+import android.app.AlertDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.widget.FrameLayout;
@@ -12,16 +13,19 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
 
+import com.example.bankingapplication.Firebase.FirebaseAuth;
 import com.example.bankingapplication.Object.Account;
 import com.example.bankingapplication.Object.User;
 import com.example.bankingapplication.Utils.GlobalVariables;
 import com.example.bankingapplication.Utils.NumberFormat;
+import com.google.android.material.button.MaterialButton;
 
 public class CustomerMainActivity extends AppCompatActivity {
     ImageView iv_user_icon, iv_copy_account_number, iv_toggle_balance,
-            iv_charge_phone;
+            iv_charge_phone, iv_customer_logout;
 
-    LinearLayout ll_transaction_history, ll_account, ll_transfer_money_feature, ll_nearby_branches_feature, ll_pay_electricity_bill_feature;
+    LinearLayout ll_transaction_history, ll_account, ll_transfer_money_feature,
+            ll_nearby_branches_feature, ll_pay_electricity_bill_feature;
 
     TextView tv_user_name, tv_account_number, tv_balance;
     FrameLayout progressOverlay;
@@ -37,7 +41,7 @@ public class CustomerMainActivity extends AppCompatActivity {
         iv_copy_account_number = findViewById(R.id.iv_copy_account_number);
         iv_toggle_balance = findViewById(R.id.iv_toggle_balance);
         iv_charge_phone = findViewById(R.id.iv_charge_phone);
-//        iv_transfer_money = findViewById(R.id.iv_transfer_money);
+        iv_customer_logout = findViewById(R.id.iv_customer_logout); // Add the new logout icon
         ll_transaction_history = findViewById(R.id.ll_transaction_history);
         ll_account = findViewById(R.id.ll_account);
         ll_transfer_money_feature = findViewById(R.id.ll_transfer_money_feature);
@@ -71,8 +75,38 @@ public class CustomerMainActivity extends AppCompatActivity {
         transferMoneyFeatureClick();
         accountClick();
         phoneClick();
-        nearbyBranchesFeatureClick(); // <<<<<< GỌI PHƯƠNG THỨC XỬ LÝ CLICK MỚI
+        nearbyBranchesFeatureClick();
         payElectricityBillFeatureClick();
+        userIconClick(); // Add this new method call
+
+        // Add logout icon click listener
+        if (iv_customer_logout != null) {
+            iv_customer_logout.setOnClickListener(v -> showLogoutConfirmationDialog());
+        }
+    }
+
+    private void showLogoutConfirmationDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Xác nhận đăng xuất");
+        builder.setMessage("Bạn có chắc chắn muốn đăng xuất khỏi tài khoản?");
+        builder.setPositiveButton("Đăng xuất", (dialog, which) -> performLogout());
+        builder.setNegativeButton("Hủy", (dialog, which) -> dialog.dismiss());
+        builder.create().show();
+    }
+
+    private void performLogout() {
+        // Sign out from Firebase Auth
+        FirebaseAuth.signOut();
+
+        // Clear global variables
+        GlobalVariables.getInstance().setCurrentUser(null);
+        GlobalVariables.getInstance().setCurrentAccount(null);
+
+        // Navigate to SignInActivity and clear all activities in stack
+        Intent intent = new Intent(this, SignInActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
+        finish();
     }
 
     @SuppressLint("SetTextI18n")
@@ -134,6 +168,31 @@ public class CustomerMainActivity extends AppCompatActivity {
     private void payElectricityBillFeatureClick() {
         ll_pay_electricity_bill_feature.setOnClickListener(v -> {
             Intent intent = new Intent(CustomerMainActivity.this, PayElectricityBillActivity.class);
+            startActivity(intent);
+        });
+    }
+
+    // Add the new click handler method for user icon
+    private void userIconClick() {
+        iv_user_icon.setOnClickListener(v -> {
+            Intent intent = new Intent(CustomerMainActivity.this, EditUserProfileActivity.class);
+            // Pass current user information to the edit activity
+            if (currentUser != null) {
+                intent.putExtra("USER_ID", currentUser.getUID());
+                intent.putExtra("USER_NAME", currentUser.getName());
+                intent.putExtra("USER_EMAIL", currentUser.getEmail());
+                intent.putExtra("USER_PHONE", currentUser.getPhone());
+                intent.putExtra("USER_ADDRESS", currentUser.getAddress());
+                intent.putExtra("USER_NATIONAL_ID", currentUser.getNationalId());
+                
+                // Optional: if you want to pass date of birth and gender
+                if (currentUser.getDateOfBirth() != null) {
+                    intent.putExtra("USER_DOB_SECONDS", currentUser.getDateOfBirth().getSeconds());
+                }
+                if (currentUser.getGender() != null) {
+                    intent.putExtra("USER_GENDER", currentUser.getGender());
+                }
+            }
             startActivity(intent);
         });
     }

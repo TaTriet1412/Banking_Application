@@ -57,6 +57,8 @@ public class BankOfficerMainActivity extends AppCompatActivity implements UserAd
 
             if (itemId == R.id.page_manage_customers) {
                 selectedFragment = new UsersListFragment();
+            } else if (itemId == R.id.page_interest_rates) {
+                selectedFragment = new InterestRatesFragment();
             } else if (itemId == R.id.page_myProfile) {
                 selectedFragment = new OfficerProfileFragment();
             }

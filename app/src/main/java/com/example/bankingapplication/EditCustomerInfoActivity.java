@@ -5,13 +5,18 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.DatePicker;
+import android.widget.FrameLayout;
 import android.widget.ProgressBar;
 import android.widget.Toast;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.AppCompatButton;
+import androidx.appcompat.widget.Toolbar;
 import com.example.bankingapplication.Firebase.Firestore;
 import com.example.bankingapplication.Object.User; // Cần để parse Timestamp
 import com.example.bankingapplication.Utils.TimeUtils; // Giả sử bạn có hàm này
@@ -42,16 +47,26 @@ public class EditCustomerInfoActivity extends AppCompatActivity {
     private TextInputEditText etName, etEmail, etPhone, etAddress, etNationalId, etDob;
     private AutoCompleteTextView actGender;
     private TextInputLayout layoutDob; // Để gán click listener cho icon
-    private MaterialButton btnSave;
-    private ProgressBar progressBar;
+    private AppCompatButton btnSave;
     private String customerId;
     private Calendar selectedDateCalendar;
+    private Toolbar toolbar;
+    private FrameLayout progressOverlay;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_edit_customer_info);
 
+        // Set up the toolbar
+        toolbar = findViewById(R.id.toolbar_edit_customer);
+        setSupportActionBar(toolbar);
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            getSupportActionBar().setDisplayShowHomeEnabled(true);
+        }
+
+        // Initialize views
         etName = findViewById(R.id.et_edit_customer_name);
         etEmail = findViewById(R.id.et_edit_customer_email);
         etPhone = findViewById(R.id.et_edit_customer_phone);
@@ -61,7 +76,7 @@ public class EditCustomerInfoActivity extends AppCompatActivity {
         layoutDob = findViewById(R.id.layout_edit_customer_dob);
         actGender = findViewById(R.id.act_edit_customer_gender);
         btnSave = findViewById(R.id.btn_save_customer_info);
-        progressBar = findViewById(R.id.progressBar_edit_customer);
+        progressOverlay = findViewById(R.id.progress_overlay);
         selectedDateCalendar = Calendar.getInstance();
 
         setupGenderDropdown();
@@ -148,7 +163,10 @@ public class EditCustomerInfoActivity extends AppCompatActivity {
             return;
         }
 
-        progressBar.setVisibility(View.VISIBLE);
+        // Show loading overlay
+        if (progressOverlay != null) {
+            progressOverlay.setVisibility(View.VISIBLE);
+        }
         btnSave.setEnabled(false);
 
         Map<String, Object> updates = new HashMap<>();
@@ -182,8 +200,12 @@ public class EditCustomerInfoActivity extends AppCompatActivity {
 
 
         Firestore.updateUserFields(customerId, updates, (isSuccess, e) -> {
-            progressBar.setVisibility(View.GONE);
+            // Hide loading overlay
+            if (progressOverlay != null) {
+                progressOverlay.setVisibility(View.GONE);
+            }
             btnSave.setEnabled(true);
+            
             if (isSuccess) {
                 Toast.makeText(EditCustomerInfoActivity.this, "Cập nhật thông tin thành công!", Toast.LENGTH_SHORT).show();
                 setResult(RESULT_OK);
@@ -201,5 +223,14 @@ public class EditCustomerInfoActivity extends AppCompatActivity {
     public boolean onSupportNavigateUp() {
         finish();
         return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        if (item.getItemId() == android.R.id.home) {
+            onBackPressed();
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 }

@@ -12,6 +12,7 @@ import androidx.fragment.app.Fragment;
 
 import com.example.bankingapplication.Object.Account;
 import com.example.bankingapplication.Object.MortgageAccount;
+import com.example.bankingapplication.Utils.AccountUtils;
 import com.example.bankingapplication.Utils.GlobalVariables;
 import com.example.bankingapplication.Utils.NumberFormat;
 import com.example.bankingapplication.Utils.TimeUtils;
@@ -59,7 +60,7 @@ public class MortgageAccountFragment extends Fragment {
             tv_payment_amount.setText(NumberFormat.convertToCurrencyFormatHasUnit(mortgageAccount.getPaymentAmount()));
             tv_start_date.setText(TimeUtils.formatFirebaseTimestamp(mortgageAccount.getStartDate()));
             tv_end_date.setText(TimeUtils.formatFirebaseTimestamp(mortgageAccount.getEndDate()));
-            tv_payment_frequency.setText(mortgageAccount.getPaymentFrequency());
+            tv_payment_frequency.setText(AccountUtils.translateTypeOfPaymentFrequency(mortgageAccount.getPaymentFrequency()));
         }
     }
 

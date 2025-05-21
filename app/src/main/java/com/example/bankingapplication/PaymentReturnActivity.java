@@ -334,16 +334,54 @@ public class PaymentReturnActivity extends AppCompatActivity {
                     Collections.singletonMap("checking.balance", newBalance), 
                     (isSuccess, e) -> {
                         if (isSuccess) {
-                            Log.d(TAG, "Account balance updated successfully. New balance: " + newBalance);
+                            Log.d(TAG, "Sender account balance updated successfully. New balance: " + newBalance);
                             // Cập nhật lại GlobalVariables để các màn hình khác có thông tin mới nhất
                             GlobalVariables.getInstance().setCurrentAccount(currentAccount);
+                            
+                            // Nếu là giao dịch chuyển tiền và có accountId người nhận, cập nhật số dư người nhận
+                            if (transaction.getToAccountId() != null && 
+                                !transaction.getToAccountId().isEmpty() && 
+                                "transfer".equals(transaction.getType())) {
+                                updateRecipientBalance(transaction.getToAccountId(), transactionAmount);
+                            }
                         } else {
-                            Log.e(TAG, "Failed to update account balance", e);
+                            Log.e(TAG, "Failed to update sender account balance", e);
                         }
                     });
         } else {
             Log.e(TAG, "Cannot update account balance: Account data is missing or invalid");
         }
+    }
+
+    // Thêm phương thức mới để cập nhật số dư tài khoản người nhận
+    private void updateRecipientBalance(String recipientAccountId, int amount) {
+        Log.d(TAG, "Updating recipient account balance: " + recipientAccountId + ", amount: " + amount);
+        
+        // Lấy thông tin tài khoản người nhận
+        Firestore.getAccountById(recipientAccountId, account -> {
+            if (account == null || account.getChecking() == null || account.getChecking().getBalance() == null) {
+                Log.e(TAG, "Cannot update recipient balance: Account data is missing or invalid");
+                return;
+            }
+            
+            // Tính toán số dư mới
+            int currentRecipientBalance = account.getChecking().getBalance();
+            int newRecipientBalance = currentRecipientBalance + amount;
+            
+            Log.d(TAG, "Recipient old balance: " + currentRecipientBalance + ", new balance: " + newRecipientBalance);
+            
+            // Cập nhật số dư mới vào Firestore
+            Firestore.updateAccountFields(account.getUID(), 
+                    Collections.singletonMap("checking.balance", newRecipientBalance), 
+                    (isSuccess, e) -> {
+                        if (isSuccess) {
+                            Log.d(TAG, "Recipient account balance updated successfully. Account: " + 
+                                    account.getUID() + ", New balance: " + newRecipientBalance);
+                        } else {
+                            Log.e(TAG, "Failed to update recipient account balance", e);
+                        }
+                    });
+        });
     }
 
     private void displayErrorState(String message) {
@@ -383,6 +421,11 @@ public class PaymentReturnActivity extends AppCompatActivity {
         if (transaction != null) {
             detailsMap.put("Loại giao dịch", transaction.getType() != null ? TransactionUtils.translateTransactionType(transaction.getType()) : "N/A");
             detailsMap.put("Nội dung", transaction.getDescription() != null ? transaction.getDescription() : "Không có");
+            
+            // Check if there's a recipient account ID and fetch the account details
+            if (transaction.getToAccountId() != null && !transaction.getToAccountId().isEmpty()) {
+                fetchRecipientAccountDetails(transaction.getToAccountId(), detailsMap);
+            }
         } else {
             detailsMap.put("Mã đơn hàng (App)", vnpayParams.get("vnp_TxnRef"));
         }
@@ -403,9 +446,65 @@ public class PaymentReturnActivity extends AppCompatActivity {
         }
 
         detailsMap.put("Mã GD VNPAY", vnpayParams.get("vnp_TransactionNo") != null ? vnpayParams.get("vnp_TransactionNo") : "N/A");
-        detailsMap.put("Ngân hàng thanh toán", vnpayParams.get("vnp_BankCode") != null ? vnpayParams.get("vnp_BankCode") : "N/A"); // Consider mapping bank codes to names
+        detailsMap.put("Ngân hàng thanh toán", "3T Banking" ); // Consider mapping bank codes to names
 
 
+        // Temporarily display the initial transaction details
+        displayTransactionDetails(detailsMap);
+    }
+
+    private void fetchRecipientAccountDetails(String accountId, Map<String, String> detailsMap) {
+        Log.d(TAG, "Fetching recipient account details for account ID: " + accountId);
+        
+        Firestore.getAccountById(accountId, new Firestore.FirestoreGetAccountCallback() {
+            @Override
+            public void onCallback(Account account) {
+                if (account != null && account.getAccountNumber() != null) {
+                    Log.d(TAG, "Recipient account found: " + account.getAccountNumber());
+                    
+                    // Create new LinkedHashMap to maintain order with the new entry
+                    Map<String, String> updatedDetailsMap = new LinkedHashMap<>(detailsMap);
+                    
+                    // Add recipient account number after "Nội dung" entry
+                    addEntryAfterKey(updatedDetailsMap, "Nội dung", "Số tài khoản nhận", account.getAccountNumber());
+                    
+                    // Refresh the display with updated map
+                    runOnUiThread(() -> {
+                        llTransactionDetailsContainer.removeAllViews();
+                        displayTransactionDetails(updatedDetailsMap);
+                    });
+                } else {
+                    Log.d(TAG, "Recipient account not found or account number is null");
+                }
+            }
+        });
+    }
+
+    // Helper method to add an entry after a specific key in a LinkedHashMap
+    private void addEntryAfterKey(Map<String, String> map, String afterKey, String newKey, String newValue) {
+        LinkedHashMap<String, String> result = new LinkedHashMap<>();
+        boolean keyFound = false;
+        
+        for (Map.Entry<String, String> entry : map.entrySet()) {
+            result.put(entry.getKey(), entry.getValue());
+            
+            if (entry.getKey().equals(afterKey)) {
+                keyFound = true;
+                result.put(newKey, newValue);
+            }
+        }
+        
+        // If the key wasn't found, just add at the end
+        if (!keyFound) {
+            result.put(newKey, newValue);
+        }
+        
+        // Clear and add all entries to the original map
+        map.clear();
+        map.putAll(result);
+    }
+
+    private void displayTransactionDetails(Map<String, String> detailsMap) {
         boolean firstItem = true;
         for (Map.Entry<String, String> entry : detailsMap.entrySet()) {
             if (!firstItem) {

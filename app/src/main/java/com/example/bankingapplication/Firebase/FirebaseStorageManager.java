@@ -190,7 +190,7 @@ public class FirebaseStorageManager {
     }
 
     // download file từ Firebase Storage về RAM dưới dạng mảng byte
-    interface DownloadFileCallback {
+    public interface DownloadFileCallback {
         void onCallback(byte[] bytes);
     }
     public static void downloadFile(String fileName, String folderPath, int timeoutSeconds, DownloadFileCallback callback) {
@@ -213,7 +213,7 @@ public class FirebaseStorageManager {
         }, timeoutSeconds, TimeUnit.SECONDS);
 
         // download file
-        final long ONE_MEGABYTE = 1024 * 1024; // kich thước file tối đa có thể download
+        final long ONE_MEGABYTE = 1024 * 1024 * 5; // kich thước file tối đa có thể download
         avatarRef.getBytes(ONE_MEGABYTE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
             @Override
             public void onSuccess(byte[] bytes) {

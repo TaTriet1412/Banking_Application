@@ -1,5 +1,6 @@
 package com.example.bankingapplication; // Hoặc package của fragment officer
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -37,6 +38,8 @@ public class UsersListFragment extends Fragment {
     private TextView tvNoCustomers; // TextView để hiển thị khi không có khách hàng
 
     private UserAdapter.OnUserClickListener userClickListener;
+
+    private static final int REQUEST_CREATE_CUSTOMER = 1001;
 
     public UsersListFragment() {
         // Required empty public constructor
@@ -80,8 +83,8 @@ public class UsersListFragment extends Fragment {
         fabAddCustomer.setOnClickListener(v -> {
             if (getActivity() == null) return;
             Intent intent = new Intent(getActivity(), SignUpActivity.class);
-            // intent.putExtra("CREATED_BY_OFFICER", true);
-            startActivity(intent);
+            intent.putExtra("CREATED_BY_OFFICER", true);
+            startActivityForResult(intent, REQUEST_CREATE_CUSTOMER);
         });
     }
 
@@ -137,6 +140,17 @@ public class UsersListFragment extends Fragment {
         // Điều này đảm bảo danh sách được cập nhật.
         Log.d(TAG, "onResume: Loading customer data");
         loadCustomerData();
+    }
+
+    // Add onActivityResult to handle the result from SignUpActivity
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == REQUEST_CREATE_CUSTOMER && resultCode == Activity.RESULT_OK) {
+            // Refresh the customer list after a new customer is added
+            Toast.makeText(getContext(), "Tạo khách hàng mới thành công", Toast.LENGTH_SHORT).show();
+            loadCustomerData();
+        }
     }
 
     @Override

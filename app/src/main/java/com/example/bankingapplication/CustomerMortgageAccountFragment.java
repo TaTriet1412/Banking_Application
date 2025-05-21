@@ -15,6 +15,7 @@ import androidx.fragment.app.Fragment;
 
 import com.example.bankingapplication.Object.MortgageAccount;
 import com.example.bankingapplication.R;
+import com.example.bankingapplication.Utils.AccountUtils;
 import com.example.bankingapplication.Utils.NumberFormat;
 import com.example.bankingapplication.Utils.TimeUtils;
 import com.google.firebase.Timestamp;
@@ -54,7 +55,7 @@ public class CustomerMortgageAccountFragment extends Fragment {
             args.putInt(ARG_REMAINING_AMOUNT, mortgageAcc.getRemainingAmount() != null ? mortgageAcc.getRemainingAmount() : 0);
             args.putInt(ARG_INTEREST_RATE, mortgageAcc.getInterestRate());
             args.putInt(ARG_PAYMENT_AMOUNT, mortgageAcc.getPaymentAmount() != null ? mortgageAcc.getPaymentAmount() : 0);
-            args.putString(ARG_PAYMENT_FREQUENCY, mortgageAcc.getPaymentFrequency());
+            args.putString(ARG_PAYMENT_FREQUENCY, AccountUtils.translateTypeOfPaymentFrequency(mortgageAcc.getPaymentFrequency()));
             if (mortgageAcc.getStartDate() != null) {
                 args.putLong(ARG_START_DATE_SECONDS, mortgageAcc.getStartDate().getSeconds());
                 args.putInt(ARG_START_DATE_NANOS, mortgageAcc.getStartDate().getNanoseconds());

@@ -48,7 +48,7 @@ dependencies {
 
     implementation("com.google.firebase:firebase-appcheck-playintegrity")
     implementation("com.google.firebase:firebase-appcheck-debug")
-
+    implementation ("com.github.bumptech.glide:glide:4.15.1")
     implementation("com.google.android.gms:play-services-vision:20.0.0")
     implementation("com.google.mlkit:text-recognition:16.0.0-beta5")
     implementation("com.github.dikamahard:FaceCompareLibrary:1.0.2")
