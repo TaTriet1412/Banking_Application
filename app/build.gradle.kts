@@ -40,13 +40,16 @@ android {
     packagingOptions {
         resources.excludes.add("META-INF/*")
     }
+    buildFeatures {
+        buildConfig = true
+    }
 }
 // <<<<<< THÊM HÀM NÀY Ở NGOÀI KHỐI android { ... } >>>>>>
 // Hàm để đọc key từ local.properties
 // Hàm getApiKey viết bằng Kotlin
 fun getApiKey(propertyName: String): String {
     val properties = Properties()
-    val localPropertiesFile = rootProject.file("local.properties") // Sử dụng rootProject.file
+    val localPropertiesFile = rootProject.file("local.properties")
     if (localPropertiesFile.exists()) {
         try {
             properties.load(FileInputStream(localPropertiesFile))

@@ -18,7 +18,6 @@ import com.example.bankingapplication.Object.Account;
 import com.example.bankingapplication.Object.User;
 import com.example.bankingapplication.Utils.GlobalVariables;
 import com.example.bankingapplication.Utils.NumberFormat;
-import com.google.android.material.button.MaterialButton;
 
 public class CustomerMainActivity extends AppCompatActivity {
     ImageView iv_user_icon, iv_copy_account_number, iv_toggle_balance,
