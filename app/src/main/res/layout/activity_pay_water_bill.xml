@@ -3,7 +3,6 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:fitsSystemWindows="true"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
@@ -12,14 +11,14 @@
         android:layout_height="match_parent"
         android:orientation="vertical"
         android:background="#F0F4F8"
-        tools:context=".PayElectricityBillActivity">
+        tools:context=".PayWaterBillActivity">
 
         <androidx.appcompat.widget.Toolbar
-            android:id="@+id/toolbar_pay_electricity"
+            android:id="@+id/toolbar_pay_water"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
             android:background="@color/green_primary"
-            app:title="Tiền điện"
+            app:title="Tiền nước"
             app:titleTextColor="@android:color/white"
             app:navigationIcon="@drawable/ic_arrow_back_white_24dp"
             app:navigationIconTint="@android:color/white"/>
@@ -101,7 +100,7 @@
                                 android:textStyle="bold"/>
 
                             <ImageView
-                                android:id="@+id/iv_toggle_balance_electricity"
+                                android:id="@+id/iv_toggle_balance_water"
                                 android:layout_width="24dp"
                                 android:layout_height="24dp"
                                 android:src="@drawable/ic_eye"
@@ -138,7 +137,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:inputType="none"
-                        tools:text="EVN Hồ Chí Minh"/>
+                        tools:text="Cấp nước Sài Gòn"/>
                 </com.google.android.material.textfield.TextInputLayout>
 
                 <!-- Mã hóa đơn -->
@@ -165,7 +164,7 @@
 
         <androidx.appcompat.widget.AppCompatButton
             android:background="@drawable/bg_btn_gradient_green_vertical"
-            android:id="@+id/btn_continue_electricity_payment"
+            android:id="@+id/btn_continue_water_payment"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Tiếp tục"
@@ -173,7 +172,7 @@
             android:textStyle="bold"
             android:layout_margin="16dp"
             app:cornerRadius="8dp"
-            android:contentDescription="Tiếp tục thanh toán hóa đơn điện"/>
+            android:contentDescription="Tiếp tục thanh toán hóa đơn nước"/>
     </LinearLayout>
 
     <ProgressBar
