@@ -29,6 +29,9 @@
         tools:ignore="LockedOrientationActivity"
         tools:targetApi="31">
         <activity
+            android:name=".ConfirmWaterPaymentActivity"
+            android:exported="false" />
+        <activity
             android:name=".PayWaterBillActivity"
             android:exported="false" />
         <activity
@@ -53,10 +56,10 @@
         <activity
             android:name=".ConfirmElectricityPaymentActivity"
             android:exported="false"
-            android:parentActivityName=".PayElectricityBillActivity">
+            android:parentActivityName=".PayWaterBillActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value=".PayElectricityBillActivity" />
+                android:value=".PayWaterBillActivity" />
         </activity>
         <activity
             android:name=".ConfirmRechargePhoneActivity"
@@ -127,7 +130,9 @@
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
                 <!-- Enable both http/https scheme handling for VNPay responses -->
-                <data android:scheme="myapp" android:host="vnpayresponse" />
+                <data
+                    android:host="vnpayresponse"
+                    android:scheme="myapp" />
                 <data android:scheme="https" />
                 <data android:scheme="http" />
             </intent-filter>

@@ -61,12 +61,12 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
 
-public class ConfirmElectricityPaymentActivity extends AppCompatActivity {
+public class ConfirmWaterPaymentActivity extends AppCompatActivity {
 
     public static final String EXTRA_BILL_NUMBER = "extra_bill_number";
     public static final String EXTRA_PROVIDER_NAME = "extra_provider_name";
     public static final String EXTRA_BILL_TYPE = "extra_bill_type";
-    private static final String TAG = "ConfirmElectricity";
+    private static final String TAG = "ConfirmWater";
     private static final int FACE_AUTH_THRESHOLD = 10000000; // 10 million VND threshold
     private static final String DEFAULT_PIN = "123456"; // This should come from user's account in production
     private static final int FACE_CAPTURE_REQUEST_CODE = 100;
@@ -122,10 +122,10 @@ public class ConfirmElectricityPaymentActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_confirm_electricity_payment);
+        setContentView(R.layout.activity_confirm_water_payment);
 
         // Initialize views
-        toolbar = findViewById(R.id.toolbar_confirm_electricity);
+        toolbar = findViewById(R.id.toolbar_confirm_water);
         tvBillNumber = findViewById(R.id.tv_confirm_bill_number);
         tvCustomerName = findViewById(R.id.tv_confirm_customer_name);
         tvProvider = findViewById(R.id.tv_confirm_provider);
@@ -449,12 +449,12 @@ public class ConfirmElectricityPaymentActivity extends AppCompatActivity {
                     isFaceLoaded = true;
                 } catch (Exception e) {
                     Log.e(TAG, "Error decoding face image", e);
-                    Toast.makeText(ConfirmElectricityPaymentActivity.this,
+                    Toast.makeText(ConfirmWaterPaymentActivity.this,
                             "Lỗi khi xử lý ảnh xác thực khuôn mặt", Toast.LENGTH_SHORT).show();
                 }
             } else {
                 Log.e(TAG, "Failed to download face image from Firebase Storage");
-                Toast.makeText(ConfirmElectricityPaymentActivity.this,
+                Toast.makeText(ConfirmWaterPaymentActivity.this,
                         "Không thể tải ảnh xác thực khuôn mặt", Toast.LENGTH_SHORT).show();
             }
 
@@ -677,7 +677,7 @@ public class ConfirmElectricityPaymentActivity extends AppCompatActivity {
                                     } else {
                                         // Ask user if they want to continue anyway
                                         runOnUiThread(() -> {
-                                            new AlertDialog.Builder(ConfirmElectricityPaymentActivity.this)
+                                            new AlertDialog.Builder(ConfirmWaterPaymentActivity.this)
                                                     .setTitle("Không phát hiện khuôn mặt rõ ràng")
                                                     .setMessage("Hệ thống không phát hiện rõ khuôn mặt trong ảnh. Bạn vẫn muốn thử xác thực?")
                                                     .setPositiveButton("Vẫn xác thực", (dialog, which) -> {
@@ -865,7 +865,7 @@ public class ConfirmElectricityPaymentActivity extends AppCompatActivity {
         if (capturedFace == null || storedFace == null) {
             runOnUiThread(() -> {
                 progressOverlay.setVisibility(View.GONE);
-                Toast.makeText(ConfirmElectricityPaymentActivity.this,
+                Toast.makeText(ConfirmWaterPaymentActivity.this,
                         "Lỗi xác thực: Không có đủ dữ liệu khuôn mặt", Toast.LENGTH_SHORT).show();
             });
             return;
@@ -878,7 +878,7 @@ public class ConfirmElectricityPaymentActivity extends AppCompatActivity {
             public void onMatch() {
                 runOnUiThread(() -> {
                     progressOverlay.setVisibility(View.GONE);
-                    Toast.makeText(ConfirmElectricityPaymentActivity.this,
+                    Toast.makeText(ConfirmWaterPaymentActivity.this,
                             "Xác thực khuôn mặt thành công", Toast.LENGTH_SHORT).show();
                     // Proceed to OTP verification
                     showOtpDialog();
@@ -889,7 +889,7 @@ public class ConfirmElectricityPaymentActivity extends AppCompatActivity {
             public void onMismatch() {
                 runOnUiThread(() -> {
                     progressOverlay.setVisibility(View.GONE);
-                    Toast.makeText(ConfirmElectricityPaymentActivity.this,
+                    Toast.makeText(ConfirmWaterPaymentActivity.this,
                             "Xác thực khuôn mặt thất bại. Khuôn mặt không khớp.",
                             Toast.LENGTH_LONG).show();
                 });
@@ -899,7 +899,7 @@ public class ConfirmElectricityPaymentActivity extends AppCompatActivity {
             public void onError(String message) {
                 runOnUiThread(() -> {
                     progressOverlay.setVisibility(View.GONE);
-                    Toast.makeText(ConfirmElectricityPaymentActivity.this,
+                    Toast.makeText(ConfirmWaterPaymentActivity.this,
                             "Lỗi khi xác thực khuôn mặt: " + message,
                             Toast.LENGTH_LONG).show();
                 });
@@ -1123,7 +1123,7 @@ public class ConfirmElectricityPaymentActivity extends AppCompatActivity {
             public void onFinish() {
                 isOtpExpired = true;
                 if (otpDialog != null && otpDialog.isShowing()) {
-                    Toast.makeText(ConfirmElectricityPaymentActivity.this, "Mã OTP đã hết hạn", Toast.LENGTH_LONG).show();
+                    Toast.makeText(ConfirmWaterPaymentActivity.this, "Mã OTP đã hết hạn", Toast.LENGTH_LONG).show();
                     btnVerifyOtp.setEnabled(false);
                     if (pinViewOtp != null) pinViewOtp.setText("");
                 }
@@ -1164,7 +1164,7 @@ public class ConfirmElectricityPaymentActivity extends AppCompatActivity {
             otpExpiryTimer.cancel();
         }
     }
-    
+
     // Transaction processing
     private void createTransactionAndBill() {
         progressOverlay.setVisibility(View.VISIBLE);
@@ -1184,7 +1184,7 @@ public class ConfirmElectricityPaymentActivity extends AppCompatActivity {
         Firestore.addEditTransaction(transaction, isSuccess -> {
             if (isSuccess) {
                 Log.d(TAG, "Transaction created successfully: " + transaction.getUID());
-                
+
                 // Update the bill with transaction ID and launch payment
                 if (currentBill != null) {
                     launchVnPayPayment(transaction, currentBill);
@@ -1230,7 +1230,7 @@ public class ConfirmElectricityPaymentActivity extends AppCompatActivity {
             Toast.makeText(this, "Không thể mở trang thanh toán", Toast.LENGTH_SHORT).show();
         }
     }
-    
+
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         if (item.getItemId() == android.R.id.home) {

@@ -87,11 +87,7 @@
         app:cardCornerRadius="12dp"
         app:cardElevation="2dp"
         app:cardBackgroundColor="@color/green_light_card_bg">
-        <!--
-           Phần dải màu xanh lá cây đậm hơn ở dưới cùng của card này
-           có thể là một View riêng hoặc gradient background.
-           Để đơn giản, ở đây là background đồng nhất.
-       -->
+        
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -190,6 +186,33 @@
 
 
             </RelativeLayout>
+            <!-- New element: Lịch sử tiết kiệm -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginTop="12dp">
+
+                <TextView
+                    android:id="@+id/tv_savings_history_label"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Lịch sử tiết kiệm"
+                    android:textColor="@color/text_grey_label"
+                    android:textSize="14sp"/>
+
+                <ImageView
+                    android:id="@+id/iv_view_interest_history"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@drawable/ic_history"
+                    android:contentDescription="Xem lịch sử tiết kiệm"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:background="?attr/selectableItemBackgroundBorderless"/>
+            </LinearLayout>
+
             <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -211,5 +234,4 @@
             </RelativeLayout>
         </LinearLayout>
     </androidx.cardview.widget.CardView>
-
 </LinearLayout>

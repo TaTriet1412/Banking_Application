@@ -2,6 +2,8 @@ package com.example.bankingapplication.Object;
 
 import com.google.firebase.Timestamp;
 
+import java.util.ArrayList;
+
 public class Account {
     private String UID;
     private String accountNumber;
@@ -12,6 +14,7 @@ public class Account {
     private MortgageAccount mortgage;
     private transient Timestamp  createdAt;
     private String pinCode;
+    private ArrayList<InterestLog> interestLogs;
 
     public Account() {
     }
@@ -33,6 +36,15 @@ public class Account {
     public String getPinCode() {
         return pinCode;
     }
+
+    public ArrayList<InterestLog> getInterestLogs() {
+        return interestLogs;
+    }
+
+    public void setInterestLogs(ArrayList<InterestLog> interestLogs) {
+        this.interestLogs = interestLogs;
+    }
+
 
     public void setPinCode(String pinCode) {
         this.pinCode = pinCode;

@@ -22,7 +22,6 @@ import com.example.bankingapplication.Firebase.Firestore; // <<<< IMPORT LỚP F
 import com.example.bankingapplication.Object.Account;
 import com.example.bankingapplication.Utils.GlobalVariables;
 import com.example.bankingapplication.Utils.NumberFormat;
-import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 // Không cần import FirebaseFirestore và QuerySnapshot trực tiếp ở đây nữa
@@ -137,7 +136,7 @@ public class PayElectricityBillActivity extends AppCompatActivity {
         showLoading(true);
         final String billType = "electricity";
 
-        Firestore.checkElectricityBillExists(provider, billCode,billType, (billExists, e) -> {
+        Firestore.checkBillExists(provider, billCode,billType, (billExists, e) -> {
             showLoading(false);
             if (e != null) {
                 // Lỗi xảy ra trong quá trình kiểm tra

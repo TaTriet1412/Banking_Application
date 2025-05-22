@@ -43,13 +43,16 @@ android {
     packagingOptions {
         resources.excludes.add("META-INF/*")
     }
+    buildFeatures {
+        buildConfig = true
+    }
 }
 // <<<<<< THÊM HÀM NÀY Ở NGOÀI KHỐI android { ... } >>>>>>
 // Hàm để đọc key từ local.properties
 // Hàm getApiKey viết bằng Kotlin
 fun getApiKey(propertyName: String): String {
     val properties = Properties()
-    val localPropertiesFile = rootProject.file("local.properties") // Sử dụng rootProject.file
+    val localPropertiesFile = rootProject.file("local.properties")
     if (localPropertiesFile.exists()) {
         try {
             properties.load(FileInputStream(localPropertiesFile))
@@ -74,7 +77,7 @@ dependencies {
     implementation("com.google.firebase:firebase-storage") // Firebase Storage
     implementation("com.google.firebase:firebase-firestore") // Firebase Firestore
     implementation("com.google.firebase:firebase-functions")
-
+    testImplementation ("org.mockito:mockito-core:4.2.0")
     implementation("com.google.firebase:firebase-appcheck-playintegrity")
     implementation("com.google.firebase:firebase-appcheck-debug")
     implementation ("com.github.bumptech.glide:glide:4.15.1")
