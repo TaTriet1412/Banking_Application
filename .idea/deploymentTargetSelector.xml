@@ -5,11 +5,11 @@
       <SelectionState runConfigName="app">
         <option name="selectionMode" value="DROPDOWN" />
         <DropdownSelection timestamp="2025-05-22T07:59:23.084097400Z">
-        <DropdownSelection timestamp="2025-05-22T05:46:24.291339100Z">
+        <!-- <DropdownSelection timestamp="2025-05-22T05:46:24.291339100Z"> -->
           <Target type="DEFAULT_BOOT">
             <handle>
               <DeviceId pluginId="LocalEmulator" identifier="path=C:\Users\khant\.android\avd\Medium_Phone.avd" />
-              <DeviceId pluginId="Default" identifier="serial=172.16.23.237:5555;connection=805c1af5" />
+              <!-- <DeviceId pluginId="Default" identifier="serial=172.16.23.237:5555;connection=805c1af5" /> -->
             </handle>
           </Target>
         </DropdownSelection>
