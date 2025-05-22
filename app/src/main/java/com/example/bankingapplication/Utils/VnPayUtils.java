@@ -22,7 +22,7 @@ public class VnPayUtils {
     public static String vnp_TmnCode = "CGXZLS0Z"; // Thay bằng TmnCode của bạn
     public static String vnp_HashSecret = "XNBCJFAKAZQSGTARRLGCHVZWCIOIGSHN"; // Thay bằng HashSecret của bạn
     public static String vnp_Url = "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html";
-    public static String vnp_ReturnUrl = "myapp://vnpayresponse"; // Quan trọng: schema và host này phải giống trong Intent Filter
+    public static final String vnp_ReturnUrl = "myapp://vnpayresponse";  // This should match the scheme/host in AndroidManifest.xml
 
     //Hàm tạo checksum
     public static String hmacSHA512(final String key, final String data) {

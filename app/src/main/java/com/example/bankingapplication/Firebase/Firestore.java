@@ -241,11 +241,43 @@ public class Firestore {
                 });
     }
 
+    /**
+     * Get account by account number
+     */
+    public static void getAccountByAccountNumber(String accountNumber, FirestoreGetAccountCallback callback) {
+        if (accountNumber == null || accountNumber.isEmpty()) {
+            Log.e("Firestore", "getAccountByAccountNumber called with null or empty account number");
+            callback.onCallback(null);
+            return;
+        }
+        
+        db.collection("accounts")
+            .whereEqualTo("accountNumber", accountNumber)
+            .limit(1) // Only need one match
+            .get()
+            .addOnSuccessListener(queryDocumentSnapshots -> {
+                if (!queryDocumentSnapshots.isEmpty()) {
+                    DocumentSnapshot document = queryDocumentSnapshots.getDocuments().get(0);
+                    Account account = document.toObject(Account.class);
+                    if (account != null) {
+                        account.setUID(document.getId());
+                    }
+                    callback.onCallback(account);
+                } else {
+                    // No account found with this account number
+                    callback.onCallback(null);
+                }
+            })
+            .addOnFailureListener(e -> {
+                Log.e("Firestore", "Error querying account by account number: ", e);
+                callback.onCallback(null);
+            });
+    }
+
     public interface getTransactionCallback {
         void onCallback(TransactionData transactionData);
     }
-
-    public static void getTransaction(String UID, getTransactionCallback callback) {
+        public static void getTransaction(String UID, getTransactionCallback callback) {
         db.collection("transactions")
                 .document(UID)
                 .get()
@@ -278,6 +310,34 @@ public class Firestore {
                     // Thêm thất bại
                     callback.onCallback(false);
                 });
+    }
+
+    public static void getAccountById(String accountId, FirestoreGetAccountCallback callback) {
+        if (accountId == null || accountId.isEmpty()) {
+            Log.e("Firestore", "getAccountById called with null or empty ID");
+            callback.onCallback(null);
+            return;
+        }
+
+        db.collection("accounts").document(accountId)
+            .get()
+            .addOnSuccessListener(documentSnapshot -> {
+                if (documentSnapshot.exists()) {
+                    Account account = documentSnapshot.toObject(Account.class);
+                    if (account != null) {
+                        // Ensure the UID is set since Firestore doesn't store it in the document
+                        account.setUID(documentSnapshot.getId());
+                    }
+                    callback.onCallback(account);
+                } else {
+                    Log.d("Firestore", "Account document does not exist");
+                    callback.onCallback(null);
+                }
+            })
+            .addOnFailureListener(e -> {
+                Log.e("Firestore", "Error getting account document", e);
+                callback.onCallback(null);
+            });
     }
 
     public static void getTransactionById(String transactionId, FirestoreGetTransactionCallback callback) {
@@ -523,6 +583,45 @@ public class Firestore {
                         // Lỗi khi thực hiện truy vấn
                         Log.e("Firestore", "Error getting electricity bill by details: ", task.getException());
                         callback.onCallback(null, task.getException());
+                    }
+                });
+    }
+
+    // Interface for getting a list of all accounts
+    public interface FirestoreGetAllAccountsCallback {
+        void onCallback(List<Account> accountList, Exception e);
+    }
+
+    // Get all accounts from Firestore
+    public static void getAllAccounts(FirestoreGetAllAccountsCallback callback) {
+        db.collection("accounts")
+                .get()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        List<Account> accountList = new ArrayList<>();
+                        QuerySnapshot querySnapshot = task.getResult();
+                        if (querySnapshot != null) {
+                            for (QueryDocumentSnapshot document : querySnapshot) {
+                                Account account = document.toObject(Account.class);
+                                account.setUID(document.getId());
+                                
+                                // If we need to load user name for each account
+                                String userId = account.getUserId();
+                                if (userId != null && !userId.isEmpty()) {
+                                    // This is optional, you could fetch user details for display purposes
+                                    // but to avoid N+1 queries, it's better to include relevant user info
+                                    // in the account document itself
+                                }
+                                
+                                accountList.add(account);
+                            }
+                            callback.onCallback(accountList, null);
+                        } else {
+                            callback.onCallback(new ArrayList<>(), new Exception("QuerySnapshot is null"));
+                        }
+                    } else {
+                        Log.e("Firestore", "Error getting account documents: ", task.getException());
+                        callback.onCallback(new ArrayList<>(), task.getException());
                     }
                 });
     }

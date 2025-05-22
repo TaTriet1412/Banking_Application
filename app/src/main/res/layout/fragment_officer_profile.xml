@@ -58,6 +58,7 @@
             app:layout_constraintBaseline_toBaselineOf="@id/labelOfficerId"/>
 
         <TextView
+            android:layout_marginTop="32dp"
             android:id="@+id/labelOfficerEmail"
             style="@style/OfficerProfileLabel"
             android:text="Email:"

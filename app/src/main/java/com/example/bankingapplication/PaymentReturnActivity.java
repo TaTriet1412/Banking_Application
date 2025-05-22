@@ -32,9 +32,12 @@ import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
 
 import com.example.bankingapplication.Firebase.Firestore;
+import com.example.bankingapplication.Object.Account;
 import com.example.bankingapplication.Object.Bill;
 import com.example.bankingapplication.Object.TransactionData;
+import com.example.bankingapplication.Object.User;
 import com.example.bankingapplication.Utils.BillUtils;
+import com.example.bankingapplication.Utils.GlobalVariables;
 import com.example.bankingapplication.Utils.TransactionUtils;
 import com.example.bankingapplication.Utils.VnPayUtils;
 
@@ -45,6 +48,7 @@ import java.io.OutputStream;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -61,7 +65,7 @@ public class PaymentReturnActivity extends AppCompatActivity {
     private ImageView ivHomeIcon, ivSuccessCheck;
     private TextView tvSuccessMessage, tvAmountDisplay, tvDateTimeDisplay;
     private LinearLayout llTransactionDetailsContainer;
-    private LinearLayout llShare, llSaveImage, llSaveContact;
+    private LinearLayout llShare, llSaveImage;
     private AppCompatButton btnBackHome;
     private ScrollView scrollView;
     private Uri savedImageUri = null;
@@ -71,6 +75,7 @@ public class PaymentReturnActivity extends AppCompatActivity {
     private String displayAmount;
     private String displayDateTime;
     private FrameLayout progressOverlay;
+    private User currentUser;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -88,7 +93,6 @@ public class PaymentReturnActivity extends AppCompatActivity {
         llTransactionDetailsContainer = findViewById(R.id.llTransactionDetailsContainer);
         llShare = findViewById(R.id.llShare);
         llSaveImage = findViewById(R.id.llSaveImage);
-        llSaveContact = findViewById(R.id.llSaveContact);
         btnBackHome = findViewById(R.id.btnBackHome);
         scrollView = findViewById(R.id.scrollView);
         progressOverlay = findViewById(R.id.progress_overlay);
@@ -98,11 +102,10 @@ public class PaymentReturnActivity extends AppCompatActivity {
 
         llShare.setOnClickListener(v -> shareTransactionDetails());
         llSaveImage.setOnClickListener(v -> saveTransactionAsImageWithPermission());
-        llSaveContact.setOnClickListener(v -> saveToContacts());
 
         // Show progress overlay initially while processing
         progressOverlay.setVisibility(View.VISIBLE);
-
+        currentUser = GlobalVariables.getInstance().getCurrentUser();
         Intent receivedIntent = getIntent();
         Uri data = receivedIntent.getData();
 
@@ -195,31 +198,36 @@ public class PaymentReturnActivity extends AppCompatActivity {
             }
             displayErrorState(errorMessage);
             Toast.makeText(this, "Thanh toán thất bại. Mã lỗi: " + responseCode, Toast.LENGTH_LONG).show();
-            updatePaymentStatus(transactionId, billId, "failed", vnpayTransactionNo, params);
+            // Chỉ cập nhật transaction status, không cập nhật bill status khi thất bại
+            updateTransactionStatusOnly(transactionId, "failed", vnpayTransactionNo, params);
         }
     }
-
-    private void displayErrorState(String message) {
-        progressOverlay.setVisibility(View.GONE); // Hide progress overlay on error
-        tvSuccessMessage.setText(message);
-        ivSuccessCheck.setImageResource(R.drawable.ic_error);
-        tvAmountDisplay.setText("");
-        tvDateTimeDisplay.setText("");
-        llTransactionDetailsContainer.setVisibility(View.GONE);
-        // Disable sharing/saving for failed transactions
-        llShare.setEnabled(false);
-        llSaveImage.setEnabled(false);
-        llSaveContact.setEnabled(false);
-        llShare.setAlpha(0.5f);
-        llSaveImage.setAlpha(0.5f);
-        llSaveContact.setAlpha(0.5f);
-    }
-
-    private String[] parseTransactionReference(String txnRef) {
-        if (txnRef != null && txnRef.contains(":")) {
-            return txnRef.split(":");
-        }
-        return null;
+    
+    private void updateTransactionStatusOnly(String transactionId, String status, String vnpTransactionNo, 
+                                             Map<String, String> vnpayParams) {
+        Firestore.getTransactionById(transactionId, transaction -> {
+            if (transaction != null) {
+                Log.d(TAG, "Retrieved transaction: " + transaction.getUID());
+                this.currentTransaction = transaction;
+                transaction.setStatus(status);
+                
+                Firestore.addEditTransaction(transaction, isTransactionUpdated -> {
+                    if (isTransactionUpdated) {
+                        Log.d(TAG, "Transaction updated successfully with status: " + status);
+                        progressOverlay.setVisibility(View.GONE);
+                        populateTransactionDetails(this.currentTransaction, null, vnpayParams, status);
+                    } else {
+                        Log.e(TAG, "Failed to update transaction");
+                        progressOverlay.setVisibility(View.GONE);
+                        populateTransactionDetails(this.currentTransaction, null, vnpayParams, status);
+                    }
+                });
+            } else {
+                Log.e(TAG, "Transaction not found with ID: " + transactionId);
+                progressOverlay.setVisibility(View.GONE);
+                populateTransactionDetails(null, null, vnpayParams, status);
+            }
+        });
     }
 
     private void updatePaymentStatus(String transactionId, String billId, String status, String vnpTransactionNo, Map<String, String> vnpayParams) {
@@ -244,6 +252,12 @@ public class PaymentReturnActivity extends AppCompatActivity {
         Firestore.addEditTransaction(transaction, isTransactionUpdated -> {
             if (isTransactionUpdated) {
                 Log.d(TAG, "Transaction updated successfully with status: " + status);
+                
+                if ("completed".equals(status)) {
+                    // Nếu giao dịch thành công, cập nhật số dư của tài khoản
+                    updateAccountBalance(transaction);
+                }
+                
                 updateBillInFirestore(billId, status, vnpTransactionNo, vnpayParams);
             } else {
                 Log.e(TAG, "Failed to update transaction");
@@ -255,41 +269,142 @@ public class PaymentReturnActivity extends AppCompatActivity {
             }
         });
     }
-
+    
     private void updateBillInFirestore(String billId, String status, String vnpTransactionNo, Map<String, String> vnpayParams) {
-        if (billId == null || billId.isEmpty() || "null".equalsIgnoreCase(billId)) {
-            Log.d(TAG, "No bill associated or billId is null/empty. Skipping bill update.");
-            progressOverlay.setVisibility(View.GONE); // Hide progress overlay when done
+        if (billId == null || billId.isEmpty()) {
+            Log.e(TAG, "updateBillInFirestore: billId is null or empty");
+            progressOverlay.setVisibility(View.GONE);
             populateTransactionDetails(this.currentTransaction, null, vnpayParams, status);
             return;
         }
-
+        
         Firestore.getBillById(billId, bill -> {
             if (bill != null) {
                 Log.d(TAG, "Retrieved bill: " + bill.getUID());
                 this.currentBill = bill;
-                bill.setStatus(status);
+                
+                // Cập nhật thông tin bill
+                if ("completed".equals(status)) {
+                    bill.setStatus(status); // Chỉ cập nhật trạng thái bill nếu giao dịch thành công
+                }
+                bill.setTransactionId(this.currentTransaction != null ? this.currentTransaction.getUID() : null);
+                
                 Firestore.addEditBill(bill, isBillUpdated -> {
-                    progressOverlay.setVisibility(View.GONE); // Hide progress overlay when done
+                    progressOverlay.setVisibility(View.GONE);
                     if (isBillUpdated) {
                         Log.d(TAG, "Bill updated successfully with status: " + status);
+                        populateTransactionDetails(this.currentTransaction, this.currentBill, vnpayParams, status);
                     } else {
                         Log.e(TAG, "Failed to update bill");
-                        if ("completed".equals(status)) {
-                            Toast.makeText(PaymentReturnActivity.this, "Lưu ý: Không thể cập nhật hóa đơn liên quan.", Toast.LENGTH_SHORT).show();
-                        }
+                        populateTransactionDetails(this.currentTransaction, null, vnpayParams, status);
                     }
-                    populateTransactionDetails(this.currentTransaction, this.currentBill, vnpayParams, status);
                 });
             } else {
                 Log.e(TAG, "Bill not found with ID: " + billId);
-                progressOverlay.setVisibility(View.GONE); // Hide progress overlay on error
-                if ("completed".equals(status)) {
-                    Toast.makeText(PaymentReturnActivity.this, "Lưu ý: Không tìm thấy hóa đơn liên quan.", Toast.LENGTH_SHORT).show();
-                }
+                progressOverlay.setVisibility(View.GONE);
                 populateTransactionDetails(this.currentTransaction, null, vnpayParams, status);
             }
         });
+    }
+    
+    private void updateAccountBalance(TransactionData transaction) {
+        // Lấy account hiện tại từ GlobalVariables
+        Account currentAccount = GlobalVariables.getInstance().getCurrentAccount();
+        
+        if (currentAccount == null) {
+            Log.e(TAG, "Cannot update account balance: Current account is null");
+            // This is likely because the user has timed out or logged out
+            // Don't show an error message here as this is a background operation
+            // Just log the error and continue
+            return;
+        }
+        
+        if (currentAccount.getChecking() != null && 
+                currentAccount.getChecking().getBalance() != null && transaction != null) {
+            
+            int currentBalance = currentAccount.getChecking().getBalance();
+            int transactionAmount = transaction.getAmount();
+            
+            // Trừ số tiền của giao dịch từ số dư hiện tại
+            int newBalance = currentBalance - transactionAmount;
+            
+            // Cập nhật số dư mới vào object CheckingAccount
+            currentAccount.getChecking().setBalance(newBalance);
+            
+            // Cập nhật tài khoản trên Firestore
+            Firestore.updateAccountFields(currentAccount.getUID(), 
+                    Collections.singletonMap("checking.balance", newBalance), 
+                    (isSuccess, e) -> {
+                        if (isSuccess) {
+                            Log.d(TAG, "Sender account balance updated successfully. New balance: " + newBalance);
+                            // Cập nhật lại GlobalVariables để các màn hình khác có thông tin mới nhất
+                            GlobalVariables.getInstance().setCurrentAccount(currentAccount);
+                            
+                            // Nếu là giao dịch chuyển tiền và có accountId người nhận, cập nhật số dư người nhận
+                            if (transaction.getToAccountId() != null && 
+                                !transaction.getToAccountId().isEmpty() && 
+                                "transfer".equals(transaction.getType())) {
+                                updateRecipientBalance(transaction.getToAccountId(), transactionAmount);
+                            }
+                        } else {
+                            Log.e(TAG, "Failed to update sender account balance", e);
+                        }
+                    });
+        } else {
+            Log.e(TAG, "Cannot update account balance: Account data is missing or invalid");
+        }
+    }
+
+    // Thêm phương thức mới để cập nhật số dư tài khoản người nhận
+    private void updateRecipientBalance(String recipientAccountId, int amount) {
+        Log.d(TAG, "Updating recipient account balance: " + recipientAccountId + ", amount: " + amount);
+        
+        // Lấy thông tin tài khoản người nhận
+        Firestore.getAccountById(recipientAccountId, account -> {
+            if (account == null || account.getChecking() == null || account.getChecking().getBalance() == null) {
+                Log.e(TAG, "Cannot update recipient balance: Account data is missing or invalid");
+                return;
+            }
+            
+            // Tính toán số dư mới
+            int currentRecipientBalance = account.getChecking().getBalance();
+            int newRecipientBalance = currentRecipientBalance + amount;
+            
+            Log.d(TAG, "Recipient old balance: " + currentRecipientBalance + ", new balance: " + newRecipientBalance);
+            
+            // Cập nhật số dư mới vào Firestore
+            Firestore.updateAccountFields(account.getUID(), 
+                    Collections.singletonMap("checking.balance", newRecipientBalance), 
+                    (isSuccess, e) -> {
+                        if (isSuccess) {
+                            Log.d(TAG, "Recipient account balance updated successfully. Account: " + 
+                                    account.getUID() + ", New balance: " + newRecipientBalance);
+                        } else {
+                            Log.e(TAG, "Failed to update recipient account balance", e);
+                        }
+                    });
+        });
+    }
+
+    private void displayErrorState(String message) {
+        progressOverlay.setVisibility(View.GONE); // Hide progress overlay on error
+        tvSuccessMessage.setText(message);
+        ivSuccessCheck.setImageResource(R.drawable.ic_error);
+        tvAmountDisplay.setText("");
+        tvDateTimeDisplay.setText("");
+        llTransactionDetailsContainer.setVisibility(View.GONE);
+        // Disable sharing/saving for failed transactions
+        llShare.setEnabled(false);
+        llSaveImage.setEnabled(false);
+        llShare.setAlpha(0.5f);
+        llSaveImage.setAlpha(0.5f);
+    }
+
+    private String[] parseTransactionReference(String txnRef) {
+        if (txnRef != null && txnRef.contains(":")) {
+            return txnRef.split(":");
+        }
+        return null;
     }
 
     private void populateTransactionDetails(TransactionData transaction, Bill bill, Map<String, String> vnpayParams, String overallStatus) {
@@ -308,6 +423,11 @@ public class PaymentReturnActivity extends AppCompatActivity {
         if (transaction != null) {
             detailsMap.put("Loại giao dịch", transaction.getType() != null ? TransactionUtils.translateTransactionType(transaction.getType()) : "N/A");
             detailsMap.put("Nội dung", transaction.getDescription() != null ? transaction.getDescription() : "Không có");
+            
+            // Check if there's a recipient account ID and fetch the account details
+            if (transaction.getToAccountId() != null && !transaction.getToAccountId().isEmpty()) {
+                fetchRecipientAccountDetails(transaction.getToAccountId(), detailsMap);
+            }
         } else {
             detailsMap.put("Mã đơn hàng (App)", vnpayParams.get("vnp_TxnRef"));
         }
@@ -315,7 +435,8 @@ public class PaymentReturnActivity extends AppCompatActivity {
         if (bill != null) {
             detailsMap.put("Loại hóa đơn", bill.getType() != null ? BillUtils.translateBillType(bill.getType()) : "N/A");
             detailsMap.put("Nhà cung cấp", bill.getProvider() != null ? bill.getProvider() : "N/A");
-            String customerId = bill.getUserId();
+            detailsMap.put("Nhà cung cấp", bill.getProvider() != null ? bill.getProvider() : "N/A");
+            String customerId = currentUser.getUID();
             if (customerId != null) {
                 int maxLength = 15;
                 if (customerId.length() > maxLength) {
@@ -328,9 +449,65 @@ public class PaymentReturnActivity extends AppCompatActivity {
         }
 
         detailsMap.put("Mã GD VNPAY", vnpayParams.get("vnp_TransactionNo") != null ? vnpayParams.get("vnp_TransactionNo") : "N/A");
-        detailsMap.put("Ngân hàng thanh toán", vnpayParams.get("vnp_BankCode") != null ? vnpayParams.get("vnp_BankCode") : "N/A"); // Consider mapping bank codes to names
+        detailsMap.put("Ngân hàng thanh toán", "3T Banking" ); // Consider mapping bank codes to names
 
 
+        // Temporarily display the initial transaction details
+        displayTransactionDetails(detailsMap);
+    }
+
+    private void fetchRecipientAccountDetails(String accountId, Map<String, String> detailsMap) {
+        Log.d(TAG, "Fetching recipient account details for account ID: " + accountId);
+        
+        Firestore.getAccountById(accountId, new Firestore.FirestoreGetAccountCallback() {
+            @Override
+            public void onCallback(Account account) {
+                if (account != null && account.getAccountNumber() != null) {
+                    Log.d(TAG, "Recipient account found: " + account.getAccountNumber());
+                    
+                    // Create new LinkedHashMap to maintain order with the new entry
+                    Map<String, String> updatedDetailsMap = new LinkedHashMap<>(detailsMap);
+                    
+                    // Add recipient account number after "Nội dung" entry
+                    addEntryAfterKey(updatedDetailsMap, "Nội dung", "Số tài khoản nhận", account.getAccountNumber());
+                    
+                    // Refresh the display with updated map
+                    runOnUiThread(() -> {
+                        llTransactionDetailsContainer.removeAllViews();
+                        displayTransactionDetails(updatedDetailsMap);
+                    });
+                } else {
+                    Log.d(TAG, "Recipient account not found or account number is null");
+                }
+            }
+        });
+    }
+
+    // Helper method to add an entry after a specific key in a LinkedHashMap
+    private void addEntryAfterKey(Map<String, String> map, String afterKey, String newKey, String newValue) {
+        LinkedHashMap<String, String> result = new LinkedHashMap<>();
+        boolean keyFound = false;
+        
+        for (Map.Entry<String, String> entry : map.entrySet()) {
+            result.put(entry.getKey(), entry.getValue());
+            
+            if (entry.getKey().equals(afterKey)) {
+                keyFound = true;
+                result.put(newKey, newValue);
+            }
+        }
+        
+        // If the key wasn't found, just add at the end
+        if (!keyFound) {
+            result.put(newKey, newValue);
+        }
+        
+        // Clear and add all entries to the original map
+        map.clear();
+        map.putAll(result);
+    }
+
+    private void displayTransactionDetails(Map<String, String> detailsMap) {
         boolean firstItem = true;
         for (Map.Entry<String, String> entry : detailsMap.entrySet()) {
             if (!firstItem) {
@@ -343,7 +520,7 @@ public class PaymentReturnActivity extends AppCompatActivity {
 
     private void addDetailRow(LinearLayout container, String label, String value) {
         LayoutInflater inflater = LayoutInflater.from(this);
-        RelativeLayout rowLayout = (RelativeLayout) inflater.inflate(R.layout.item_transaction_detail_row, container, false);
+        LinearLayout rowLayout = (LinearLayout) inflater.inflate(R.layout.item_transaction_detail_row, container, false);
         TextView tvLabel = rowLayout.findViewById(R.id.tvDetailLabel);
         TextView tvValue = rowLayout.findViewById(R.id.tvDetailValue);
         tvLabel.setText(label);
@@ -634,114 +811,6 @@ public class PaymentReturnActivity extends AppCompatActivity {
     }
 
 
-    private void saveToContacts() {
-        if (tvSuccessMessage.getText().toString().toLowerCase().contains("thất bại")) {
-            Toast.makeText(this, "Không thể lưu thông tin từ giao dịch thất bại.", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        String contactPhone = null;
-        String contactName = null;
-        String contactCompany = null; // Keep this for bill provider info if not a phone top-up
-
-        final String PHONE_TOP_UP_PREFIX = "Nạp tiền ĐT ";
-
-        // 1. Prioritize extracting phone number from transaction description for "Nạp tiền ĐT"
-        if (currentTransaction != null && currentTransaction.getDescription() != null) {
-            String description = currentTransaction.getDescription();
-            if (description.startsWith(PHONE_TOP_UP_PREFIX)) {
-                // Extract the part after "Nạp tiền ĐT "
-                String potentialPhoneNumber = description.substring(PHONE_TOP_UP_PREFIX.length()).trim();
-
-                // Further validation: Extract only the leading digits to handle cases like "0908878789 for A"
-                StringBuilder actualPhoneDigits = new StringBuilder();
-                for (char c : potentialPhoneNumber.toCharArray()) {
-                    if (Character.isDigit(c)) {
-                        actualPhoneDigits.append(c);
-                    } else {
-                        // Stop if a non-digit character is encountered after the number started
-                        if (actualPhoneDigits.length() > 0) break;
-                    }
-                }
-
-                if (actualPhoneDigits.length() > 0) { // Check if any digits were extracted
-                    // Basic validation for phone number length (e.g., 9 to 11 digits for Vietnam)
-                    if (actualPhoneDigits.length() >= 9 && actualPhoneDigits.length() <= 11) {
-                        contactPhone = actualPhoneDigits.toString();
-//                        contactName = "Nạp tiền ĐT " + contactPhone; // Or just "Nạp tiền điện thoại"
-                        // For phone top-ups, company might not be relevant, or could be the telco if known
-                        // For now, we'll leave contactCompany null here, as the primary info is the phone number
-                    } else {
-                        Log.w(TAG, "Extracted number '" + actualPhoneDigits + "' from description doesn't look like a valid phone number length.");
-                    }
-                }
-            }
-            // You could also try to get a generic recipient name if the description wasn't a phone top-up
-            // else if (currentTransaction.getRecipientName() != null) {
-            //     contactName = currentTransaction.getRecipientName();
-            // }
-        }
-
-        // 2. Fallback or other types of transactions (e.g., bill payments)
-        // If contactPhone was NOT set from the description (meaning it wasn't a "Nạp tiền ĐT" type)
-        if (contactPhone == null) {
-            // Example: If TransactionData has recipient phone for P2P (and it's not a phone top-up)
-            // if (currentTransaction != null && currentTransaction.getRecipientPhoneNumber() != null) {
-            //     contactPhone = currentTransaction.getRecipientPhoneNumber();
-            //     if (contactName == null && currentTransaction.getRecipientName() != null) {
-            //         contactName = currentTransaction.getRecipientName();
-            //     }
-            // }
-
-            // Example: If Bill has provider info and maybe a service phone
-            if (currentBill != null) {
-                if (currentBill.getProvider() != null) {
-                    contactCompany = currentBill.getProvider();
-                    // If no specific contact name yet from transaction, use provider as name
-                    if (contactName == null) {
-                        contactName = contactCompany;
-                    }
-                }
-                // If bill has a specific service phone number field and we don't have one yet
-                // if (contactPhone == null && currentBill.getProviderServicePhoneNumber() != null) {
-                //    contactPhone = currentBill.getProviderServicePhoneNumber();
-                // }
-            }
-        }
-
-
-        // --- Check if we have a phone number to save ---
-        if (contactPhone == null || contactPhone.trim().isEmpty()) {
-            Toast.makeText(this, "Không tìm thấy số điện thoại hợp lệ trong chi tiết giao dịch để lưu.", Toast.LENGTH_LONG).show();
-            return;
-        }
-
-        // --- Step 2: Use ContactsContract Intents ---
-        Intent intent = new Intent(ContactsContract.Intents.Insert.ACTION);
-        intent.setType(ContactsContract.RawContacts.CONTENT_TYPE);
-
-        intent.putExtra(ContactsContract.Intents.Insert.PHONE, contactPhone);
-        // Optionally, set phone type
-        // intent.putExtra(ContactsContract.Intents.Insert.PHONE_TYPE, ContactsContract.CommonDataKinds.Phone.TYPE_MOBILE);
-
-//        if (contactName != null && !contactName.trim().isEmpty()) {
-//            intent.putExtra(ContactsContract.Intents.Insert.NAME, contactName);
-//        }
-//        // Add company only if it's relevant (e.g., for a bill provider, not for a simple phone top-up identified above)
-//        // and if it's different from the name or if name is not set.
-//        if (contactCompany != null && !contactCompany.trim().isEmpty()) {
-//            if (contactName == null || !contactName.equals(contactCompany)) {
-//                intent.putExtra(ContactsContract.Intents.Insert.COMPANY, contactCompany);
-//            }
-//        }
-//        // No extra notes, keeping it simple as requested.
-
-        if (intent.resolveActivity(getPackageManager()) != null) {
-            startActivity(intent);
-        } else {
-            Toast.makeText(this, "Không tìm thấy ứng dụng Danh bạ.", Toast.LENGTH_SHORT).show();
-        }
-    }
 
     private boolean verifySecureHash(Map<String, String> params, String secretKey) {
         // Implement proper VNPAY hash verification here (ideally on server)

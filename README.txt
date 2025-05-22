@@ -1,3 +1,6 @@
+Video demo: https://drive.google.com/drive/folders/1BvSTImOPJj1iRojdnIFZ61sx0uYBtLuc?usp=sharing
+Link Github: https://github.com/TaTriet1412/Banking_Application
+
 # 3T Banking Application
 
 ## Overview

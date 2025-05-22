@@ -34,7 +34,11 @@ import com.example.bankingapplication.DTO.Response.CardFrontRes;
 import com.example.bankingapplication.Firebase.FirebaseAuth;
 import com.example.bankingapplication.Firebase.FirebaseStorageManager;
 import com.example.bankingapplication.Firebase.Firestore;
+import com.example.bankingapplication.Object.Account;
 import com.example.bankingapplication.Object.Biometric;
+import com.example.bankingapplication.Object.CheckingAccount;
+import com.example.bankingapplication.Object.MortgageAccount;
+import com.example.bankingapplication.Object.SavingAccount;
 import com.example.bankingapplication.Object.User;
 import com.example.bankingapplication.Utils.ActionUtils;
 import com.example.bankingapplication.Utils.AudioEffectUtils;
@@ -54,12 +58,14 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Map;
 import java.util.Objects;
+import java.util.List;
+import java.util.Random;
 
 
 public class SignUpActivity extends AppCompatActivity {
     TextInputEditText edtDisplayName, edtEmail, edtBirthday, edtPhoneNumber, edtPassword, edtConfirmPassword;
-    // Make sure you have edtNationalId and edtAddress defined if they are in your XML
-    TextInputEditText edtNationalId, edtAddress;
+    // Add PIN code field
+    TextInputEditText edtNationalId, edtAddress, edtPinCode;
 
     AutoCompleteTextView autoGender;
     AppCompatButton btnAddAccount;
@@ -88,14 +94,21 @@ public class SignUpActivity extends AppCompatActivity {
 
     private static final String PHOTO_URI_KEY = "photoUri";
     private static final String TAG = "SignUpActivity";
-    String displayName, email, birthday, phoneNumber, password, confirmPassword, nationalId, address, gender;
+    String displayName, email, birthday, phoneNumber, password, confirmPassword, nationalId, address, gender, pinCode;
 
+    // Add a flag to track who initiated the sign-up
+    private boolean isCreatedByOfficer = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_sign_up);
+
+        // Get the intent flag that indicates who created this activity
+        if (getIntent() != null && getIntent().hasExtra("CREATED_BY_OFFICER")) {
+            isCreatedByOfficer = getIntent().getBooleanExtra("CREATED_BY_OFFICER", false);
+        }
 
         if (savedInstanceState != null) {
             photoUri = savedInstanceState.getParcelable(PHOTO_URI_KEY);
@@ -123,7 +136,7 @@ public class SignUpActivity extends AppCompatActivity {
         btnAddAccount = findViewById(R.id.btnAddAccount);
         edtNationalId = findViewById(R.id.edtNationalId);
         edtAddress = findViewById(R.id.edtAddress);
-
+        edtPinCode = findViewById(R.id.edtPinCode); // Initialize PIN code field
 
         ActionUtils.setUpGenderPicker(autoGender);
         autoGender.setText("Nam", false); // Set default
@@ -168,6 +181,7 @@ public class SignUpActivity extends AppCompatActivity {
         address = Objects.requireNonNull(edtAddress.getText()).toString().trim();
         gender = autoGender.getText().toString();
         nationalId = Objects.requireNonNull(edtNationalId.getText()).toString().trim();
+        pinCode = Objects.requireNonNull(edtPinCode.getText()).toString().trim();
 
         if (displayName.isEmpty()) { showToastAndStopProgress("Vui lòng nhập tên hiển thị"); return false; }
         if (email.isEmpty()) { showToastAndStopProgress("Vui lòng nhập email"); return false; }
@@ -177,6 +191,15 @@ public class SignUpActivity extends AppCompatActivity {
         if (confirmPassword.isEmpty()) { showToastAndStopProgress("Vui lòng xác nhận mật khẩu"); return false; }
         if (nationalId.isEmpty()) { showToastAndStopProgress("Vui lòng nhập số CCCD"); return false; }
         if (address.isEmpty()) { showToastAndStopProgress("Vui lòng nhập địa chỉ"); return false; }
+        // Validate PIN code
+        if (pinCode.isEmpty()) { 
+            showToastAndStopProgress("Vui lòng nhập mã PIN"); 
+            return false; 
+        }
+        if (pinCode.length() != 6 || !pinCode.matches("\\d+")) { 
+            showToastAndStopProgress("Mã PIN phải có đúng 6 chữ số"); 
+            return false; 
+        }
 
         if (password.length() < 6) { showToastAndStopProgress("Mật khẩu phải có ít nhất 6 ký tự"); return false; }
         if (!password.equals(confirmPassword)) { showToastAndStopProgress("Mật khẩu không khớp"); return false; }
@@ -290,15 +313,121 @@ public class SignUpActivity extends AppCompatActivity {
             public void onCallback(boolean isSuccess) {
                 if (isSuccess) {
                     Log.d(TAG, "Firestore user creation successful.");
-                    uploadImagesAndFinalize();
+                    // Create bank account after user is created
+                    createBankAccount(user.getUID());
                 } else {
                     Log.e(TAG, "Firestore user creation failed.");
                     showToastAndStopProgress("Lỗi tạo thông tin người dùng trong cơ sở dữ liệu.");
-                    // Consider deleting the Firebase Auth user if Firestore creation fails
-                    // FirebaseAuth.deleteCurrentUser();
                 }
             }
         });
+    }
+
+    // New method to create bank account
+    private void createBankAccount(String userId) {
+        // Generate a random account number and check if it's unique
+        generateUniqueAccountNumber(new AccountNumberCallback() {
+            @Override
+            public void onAccountNumberGenerated(String accountNumber) {
+                if (accountNumber == null) {
+                    Log.e(TAG, "Failed to generate unique account number.");
+                    showToastAndStopProgress("Lỗi tạo số tài khoản ngân hàng.");
+                    return;
+                }
+
+                // Create default checking account
+                CheckingAccount checking = new CheckingAccount(0);
+
+                // Create default saving account
+                SavingAccount saving = new SavingAccount(0, 0.1, "active");
+
+                // Create default mortgage account
+                Timestamp currentTime = Timestamp.now();
+                MortgageAccount mortgage = new MortgageAccount(0, 0, 0, 0, "monthly", currentTime, currentTime);
+
+                // Create the account
+                Account account = new Account(
+                        Firestore.generateId("AC"),
+                        accountNumber,
+                        userId,
+                        "active",
+                        checking,
+                        saving,
+                        mortgage,
+                        Timestamp.now(),
+                        pinCode
+                );
+
+                // Save account to Firestore
+                Firestore.createAccount(account, new Firestore.FirestoreAddCallback() {
+                    @Override
+                    public void onCallback(boolean isSuccess) {
+                        if (isSuccess) {
+                            Log.d(TAG, "Bank account created successfully.");
+                            // Continue with image uploads after account creation
+                            uploadImagesAndFinalize();
+                        } else {
+                            Log.e(TAG, "Failed to create bank account.");
+                            showToastAndStopProgress("Lỗi tạo tài khoản ngân hàng.");
+                        }
+                    }
+                });
+            }
+        });
+    }
+
+    // Interface for account number callback
+    private interface AccountNumberCallback {
+        void onAccountNumberGenerated(String accountNumber);
+    }
+
+    // Method to generate a unique account number
+    private void generateUniqueAccountNumber(AccountNumberCallback callback) {
+        // Get all existing accounts to check for duplicates
+        Firestore.getAllAccounts(new Firestore.FirestoreGetAllAccountsCallback() {
+            @Override
+            public void onCallback(List<Account> accountList, Exception e) {
+                if (e != null) {
+                    Log.e(TAG, "Error fetching accounts to check uniqueness: ", e);
+                    callback.onAccountNumberGenerated(null);
+                    return;
+                }
+
+                // Generate a random 10-digit account number
+                String accountNumber = generateRandomAccountNumber();
+                
+                // Check if the account number already exists
+                boolean isUnique = true;
+                if (accountList != null) {
+                    for (Account account : accountList) {
+                        if (accountNumber.equals(account.getAccountNumber())) {
+                            isUnique = false;
+                            break;
+                        }
+                    }
+                }
+
+                if (isUnique) {
+                    callback.onAccountNumberGenerated(accountNumber);
+                } else {
+                    // Try again if not unique
+                    generateUniqueAccountNumber(callback);
+                }
+            }
+        });
+    }
+
+    // Method to generate a random account number
+    private String generateRandomAccountNumber() {
+        // Generate a 10-digit random number
+        StringBuilder sb = new StringBuilder();
+        Random random = new Random();
+        
+        for (int i = 0; i < 10; i++) {
+            sb.append(random.nextInt(10));
+        }
+        
+        return sb.toString();
     }
 
     private void uploadImagesAndFinalize() {
@@ -312,17 +441,27 @@ public class SignUpActivity extends AppCompatActivity {
                 Log.d(TAG, "Avatar uploaded successfully: " + faceImageUrl);
                 ImageUtils.uploadImage("biometricData.cardFrontUrl", "users", uid, imgCardFrontUri, "cardFrontImg/", new ImageUtils.ImageUploadCallback() {
                     @Override
-                    public void onSuccess(String cardFrontImageUrl) {
-                        Log.d(TAG, "Card front uploaded successfully: " + cardFrontImageUrl);
+                    public void onSuccess(String cardFrontUrl) {
+                        Log.d(TAG, "Card front uploaded successfully: " + cardFrontUrl);
                         ImageUtils.uploadImage("biometricData.cardBackUrl", "users", uid, imgCardBackUri, "cardBackImg/", new ImageUtils.ImageUploadCallback() {
                             @Override
-                            public void onSuccess(String cardBackImageUrl) {
-                                Log.d(TAG, "Card back uploaded successfully: " + cardBackImageUrl);
-                                showToastAndStopProgress("Đăng ký thành công!");
-                                Intent intent = new Intent(SignUpActivity.this, SignInActivity.class);
-                                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                                startActivity(intent);
-                                finishAffinity();
+                            public void onSuccess(String cardBackUrl) {
+                                Log.d(TAG, "Card back uploaded successfully: " + cardBackUrl);
+                                progressOverlay.setVisibility(View.GONE);
+                                Toast.makeText(SignUpActivity.this, "Đăng ký thành công!", Toast.LENGTH_LONG).show();
+
+                                // Handle different navigation paths based on who created the activity
+                                if (isCreatedByOfficer) {
+                                    // If created by a bank officer, just finish this activity to return to the officer's screen
+                                    setResult(RESULT_OK);
+                                    finish();
+                                } else {
+                                    // If created by a normal user flow, navigate to sign in screen
+                                    Intent intent = new Intent(SignUpActivity.this, SignInActivity.class);
+                                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+                                    startActivity(intent);
+                                    finish();
+                                }
                             }
 
                             @Override
@@ -480,38 +619,54 @@ public class SignUpActivity extends AppCompatActivity {
                             return;
                         }
 
-
-                        if (currentImageType == ImageType.CARD_FRONT) { // Removed bitmap != null check as it's done above
+                        if (currentImageType == ImageType.CARD_FRONT) {
                             Bitmap finalBitmap = bitmap;
-                            OCRUtils.extractTextFromCardFront(bitmap, new OCRUtils.OcrCallback() {
+                            // First, detect face in ID card
+                            FaceDetectionUtils.isFacePresent(bitmap, new FaceDetectionUtils.OnFaceDetectionListener() {
                                 @Override
-                                public void onSuccess(Map<String, String> data) {
-                                    cardFrontData = new CardFrontRes(data);
-                                    Log.d(TAG, "OCR Result: " + cardFrontData.getResult());
-                                    String ocrNationalId = cardFrontData.getResult().get("nationalId");
-                                    if (ocrNationalId != null) {
-                                        Toast.makeText(SignUpActivity.this, "Đã nhận diện CCCD: " + ocrNationalId, Toast.LENGTH_SHORT).show();
-                                    } else {
-                                        Toast.makeText(SignUpActivity.this, "Không nhận diện được số CCCD từ ảnh.", Toast.LENGTH_SHORT).show();
+                                public void onFaceDetected(boolean isFacePresent) {
+                                    if (!isFacePresent) {
+                                        showToastAndStopProgress("Không phát hiện khuôn mặt trong ảnh CCCD. Vui lòng chụp lại.");
+                                        imgCardFront.setImageResource(R.drawable.ic_image_null);
+                                        imgCardFrontUri = null;
+                                        imgCardFrontByte = null;
+                                        cardFrontData = null;
+                                        bitmapNationalId = null;
+                                        return;
                                     }
-                                    imgCardFront.setImageBitmap(finalBitmap);
-                                    imgCardFrontUri = photoUri;
-                                    imgCardFrontByte = FirebaseStorageManager.bitmapToByteArray(finalBitmap);
-                                    bitmapNationalId = finalBitmap;
-                                    progressOverlay.setVisibility(View.GONE);
-                                }
+                                    
+                                    // If face is detected, proceed with OCR
+                                    OCRUtils.extractTextFromCardFront(finalBitmap, new OCRUtils.OcrCallback() {
+                                        @Override
+                                        public void onSuccess(Map<String, String> data) {
+                                            cardFrontData = new CardFrontRes(data);
+                                            Log.d(TAG, "OCR Result: " + cardFrontData.getResult());
+                                            String ocrNationalId = cardFrontData.getResult().get("nationalId");
+                                            if (ocrNationalId != null) {
+                                                Toast.makeText(SignUpActivity.this, "Đã nhận diện CCCD: " + ocrNationalId, Toast.LENGTH_SHORT).show();
+                                            } else {
+                                                Toast.makeText(SignUpActivity.this, "Không nhận diện được số CCCD từ ảnh.", Toast.LENGTH_SHORT).show();
+                                            }
+                                            imgCardFront.setImageBitmap(finalBitmap);
+                                            imgCardFrontUri = photoUri;
+                                            imgCardFrontByte = FirebaseStorageManager.bitmapToByteArray(finalBitmap);
+                                            bitmapNationalId = finalBitmap;
+                                            progressOverlay.setVisibility(View.GONE);
+                                        }
 
-                                @Override
-                                public void onFailure(String errorMessage) {
-                                    Toast.makeText(SignUpActivity.this, "Lỗi OCR: " + errorMessage, Toast.LENGTH_LONG).show();
-                                    imgCardFront.setImageResource(R.drawable.ic_image_null);
-                                    cardFrontData = null; // Invalidate OCR data
-                                    bitmapNationalId = null;
-                                    imgCardFrontByte = null;
-                                    progressOverlay.setVisibility(View.GONE);
+                                        @Override
+                                        public void onFailure(String errorMessage) {
+                                            Toast.makeText(SignUpActivity.this, "Lỗi OCR: " + errorMessage, Toast.LENGTH_LONG).show();
+                                            imgCardFront.setImageResource(R.drawable.ic_image_null);
+                                            cardFrontData = null; // Invalidate OCR data
+                                            bitmapNationalId = null;
+                                            imgCardFrontByte = null;
+                                            progressOverlay.setVisibility(View.GONE);
+                                        }
+                                    });
                                 }
                             });
-                        } else if (currentImageType == ImageType.AVATAR) { // Removed bitmap != null check
+                        } else if (currentImageType == ImageType.AVATAR) {
                             Bitmap finalBitmap1 = bitmap;
                             FaceDetectionUtils.isFacePresent(bitmap, new FaceDetectionUtils.OnFaceDetectionListener() {
                                 @Override
@@ -531,7 +686,7 @@ public class SignUpActivity extends AppCompatActivity {
                                     bitmapAvatar = finalBitmap1;
                                 }
                             });
-                        } else if (currentImageType == ImageType.CARD_BACK) { // Removed bitmap != null check
+                        } else if (currentImageType == ImageType.CARD_BACK) {
                             imgCardBack.setImageBitmap(bitmap);
                             imgCardBackUri = photoUri;
                             imgCardBackByte = FirebaseStorageManager.bitmapToByteArray(bitmap);

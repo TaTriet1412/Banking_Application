@@ -150,7 +150,7 @@
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
 
-            <!-- Action Buttons: Share, Save Image, Save Contact -->
+            <!-- Action Buttons: Share, Save Image -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -203,30 +203,6 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Lưu ảnh"
-                        android:textSize="12sp"
-                        android:textColor="@color/text_dark"/>
-                </LinearLayout>
-
-                <LinearLayout
-                    android:id="@+id/llSaveContact"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:orientation="vertical"
-                    android:gravity="center"
-                    android:clickable="true"
-                    android:focusable="true"
-                    android:background="?attr/selectableItemBackgroundBorderless">
-                    <ImageView
-                        android:layout_width="36dp"
-                        android:layout_height="36dp"
-                        android:src="@drawable/ic_save_2"
-                        android:padding="4dp"
-                        android:contentDescription="Save to Contacts"/>
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Lưu danh bạ"
                         android:textSize="12sp"
                         android:textColor="@color/text_dark"/>
                 </LinearLayout>

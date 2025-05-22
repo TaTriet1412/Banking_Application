@@ -138,6 +138,7 @@ public class SignInActivity extends AppCompatActivity {
         btnSignUp.setOnClickListener(v -> {
             AudioEffectUtils.clickEffect(this);
             Intent intent = new Intent(SignInActivity.this, SignUpActivity.class);
+            // Don't set CREATED_BY_OFFICER flag here since this is the normal user flow
             startActivity(intent);
         });
     }

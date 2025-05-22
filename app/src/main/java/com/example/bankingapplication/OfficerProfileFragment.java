@@ -11,6 +11,7 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 // import android.widget.ProgressBar; // Nếu bạn thêm ProgressBar
+import android.app.AlertDialog;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -19,6 +20,7 @@ import androidx.fragment.app.Fragment;
 import com.example.bankingapplication.Firebase.FirebaseAuth; // Lớp FirebaseAuth của bạn
 import com.example.bankingapplication.Firebase.Firestore;   // Lớp Firestore của bạn
 import com.example.bankingapplication.Object.User;
+import com.example.bankingapplication.Utils.GlobalVariables;
 import com.google.android.material.imageview.ShapeableImageView;
 // import com.bumptech.glide.Glide; // Nếu bạn dùng Glide cho avatar
 
@@ -47,8 +49,8 @@ public class OfficerProfileFragment extends Fragment {
         btnEditOfficerProfile = view.findViewById(R.id.btn_edit_officer_profile);
         // progressBarOfficerProfile = view.findViewById(R.id.progressBar_officer_profile); // Nếu có
 
-        // Giả sử bạn thêm một nút logout vào layout fragment_officer_profile.xml
-        // btnLogoutOfficer = view.findViewById(R.id.btn_logout_officer);
+        // Ánh xạ nút đăng xuất từ layout
+        btnLogoutOfficer = view.findViewById(R.id.btn_logout_officer);
 
         return view;
     }
@@ -65,18 +67,40 @@ public class OfficerProfileFragment extends Fragment {
             Toast.makeText(getContext(), "Chức năng sửa thông tin đang được phát triển.", Toast.LENGTH_SHORT).show();
         });
 
-        // if (btnLogoutOfficer != null) {
-        //     btnLogoutOfficer.setOnClickListener(v -> {
-        //         FirebaseAuth.signOut();
-        //         // Điều hướng về màn hình đăng nhập
-        //         Intent intent = new Intent(getActivity(), SignInActivity.class);
-        //         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK); // Xóa back stack
-        //         startActivity(intent);
-        //         if (getActivity() != null) {
-        //             getActivity().finish();
-        //         }
-        //     });
-        // }
+        // Thêm sự kiện click cho nút đăng xuất
+        if (btnLogoutOfficer != null) {
+            btnLogoutOfficer.setOnClickListener(v -> {
+                showLogoutConfirmationDialog();
+            });
+        }
+    }
+
+    private void showLogoutConfirmationDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
+        builder.setTitle("Xác nhận đăng xuất");
+        builder.setMessage("Bạn có chắc chắn muốn đăng xuất khỏi tài khoản?");
+        builder.setPositiveButton("Đăng xuất", (dialog, which) -> {
+            performLogout();
+        });
+        builder.setNegativeButton("Hủy", (dialog, which) -> dialog.dismiss());
+        builder.create().show();
+    }
+
+    private void performLogout() {
+        // Sign out from Firebase Auth
+        FirebaseAuth.signOut();
+        
+        // Clear global variables if needed
+        GlobalVariables.getInstance().setCurrentUser(null);
+        GlobalVariables.getInstance().setCurrentAccount(null);
+
+        // Navigate to SignInActivity and clear all activities in stack
+        Intent intent = new Intent(getActivity(), SignInActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
+        if (getActivity() != null) {
+            getActivity().finish();
+        }
     }
 
     private void loadOfficerProfile() {
