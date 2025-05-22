@@ -3,6 +3,7 @@ package com.example.bankingapplication;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -75,6 +76,18 @@ public class CheckingAccountFragment extends Fragment {
     private void arrowClickEvent() {
         iv_arrow_details.setOnClickListener(v -> {
             // Handle arrow details action
+            // Mở TransactionHistoryActivity
+            if (getActivity() != null) { // Kiểm tra context trước khi tạo Intent
+                Intent intent = new Intent(getActivity(), TransactionHistoryActivity.class);
+                // Bạn có thể truyền thêm dữ liệu nếu cần, ví dụ:
+                // Account currentAccount = GlobalVariables.getInstance().getCurrentAccount();
+                // if (currentAccount != null) {
+                //     intent.putExtra("ACCOUNT_ID_FOR_HISTORY", currentAccount.getUID());
+                // }
+                startActivity(intent);
+            } else {
+                Toast.makeText(getContext(), "Không thể mở lịch sử giao dịch.", Toast.LENGTH_SHORT).show();
+            }
         });
     }
 

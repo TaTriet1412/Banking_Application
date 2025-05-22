@@ -33,6 +33,8 @@ public class CustomerDetailsFragment extends Fragment {
     private static final String ARG_CUSTOMER_ID = "customer_id";
     private String customerId;
 
+    private String customerIdFromArgs;
+
     private ShapeableImageView imgCustomerAvatarDetailOfficer;
     private TextView tvCustomerDetailName, tvCustomerDetailEmail, tvCustomerDetailIdCard, tvCustomerDetailPhone;
     private LinearLayout llEditCustomerInfoOfficer;
@@ -66,6 +68,7 @@ public class CustomerDetailsFragment extends Fragment {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
             customerId = getArguments().getString(ARG_CUSTOMER_ID);
+            customerIdFromArgs = customerId;
             Log.d(TAG, "onCreate: Received customerId: " + customerId);
         } else {
             Log.e(TAG, "onCreate: No arguments received (customerId is null).");
@@ -253,6 +256,21 @@ public class CustomerDetailsFragment extends Fragment {
         // Điều này sẽ xử lý cả lần load đầu tiên (nếu onViewCreated chưa kịp) và các lần refresh sau đó.
         if (customerId != null && !customerId.isEmpty()) {
             Log.d(TAG, "onResume: Triggering data load/refresh for customerId: " + customerId);
+            loadCustomerDetailsAndAccounts(customerId);
+        }
+    }
+
+    public String getCustomerIdFromArgs() {
+        return customerIdFromArgs;
+    }
+
+    public User getCurrentLoadedUser() {
+        return currentLoadedUser;
+    }
+
+    public void refreshCustomerDataOnDemand() {
+        if (customerId != null && !customerId.isEmpty()) {
+            Log.d(TAG, "refreshCustomerDataOnDemand: Reloading data for customerId: " + customerId);
             loadCustomerDetailsAndAccounts(customerId);
         }
     }

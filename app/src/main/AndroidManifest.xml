@@ -108,6 +108,15 @@
             android:configChanges="orientation|screenSize"
             android:exported="false" />
         <activity
+            android:name=".TransactionHistoryActivity"
+            android:exported="false" />
+        <activity
+            android:name=".TransactionDetailActivity"
+            android:exported="false" />
+        <activity
+            android:name=".EditOfficerProfileActivity"
+            android:exported="false" />
+        <activity
             android:name=".PaymentReturnActivity"
             android:exported="true"
             android:launchMode="singleTask"> <!-- singleTask hoặc singleTop để tránh tạo nhiều instance -->

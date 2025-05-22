@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <solid android:color="@color/red_error" /> <!-- Hoặc màu bạn muốn cho tag thất bại -->
+    <corners android:radius="4dp" /> <!-- Bo góc nhẹ -->
+</shape>

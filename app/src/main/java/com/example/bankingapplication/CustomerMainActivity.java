@@ -78,11 +78,19 @@ public class CustomerMainActivity extends AppCompatActivity {
         nearbyBranchesFeatureClick();
         payElectricityBillFeatureClick();
         userIconClick(); // Add this new method call
+        transactionHistoryClick();
 
         // Add logout icon click listener
         if (iv_customer_logout != null) {
             iv_customer_logout.setOnClickListener(v -> showLogoutConfirmationDialog());
         }
+    }
+
+    private void transactionHistoryClick() {
+        ll_transaction_history.setOnClickListener(v -> {
+            Intent intent = new Intent(CustomerMainActivity.this, TransactionHistoryActivity.class);
+            startActivity(intent);
+        });
     }
 
     private void showLogoutConfirmationDialog() {

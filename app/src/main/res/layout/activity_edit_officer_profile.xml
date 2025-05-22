@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".EditOfficerProfileActivity">
+
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/toolbar_edit_officer_profile"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="@color/green_primary"
+        app:navigationIcon="@drawable/ic_arrow_back_white_24dp"
+        app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
+        app:title="Cập nhật hồ sơ nhân viên"
+        app:titleTextColor="@android:color/white" />
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@id/toolbar_edit_officer_profile">
+
+        <androidx.core.widget.NestedScrollView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_above="@+id/btn_save_officer_container"
+            android:fillViewport="true">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <!-- Họ và tên -->
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/layout_edit_officer_name"
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Họ và tên (*)">
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/et_edit_officer_name"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="textPersonName|textCapWords"/>
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <!-- Email (Hiển thị, không cho sửa) -->
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/layout_edit_officer_email"
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:hint="Email">
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/et_edit_officer_email"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="textEmailAddress"
+                        android:focusable="false"
+                        android:clickable="false"/>
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <!-- Số điện thoại -->
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/layout_edit_officer_phone"
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:hint="Số điện thoại (*)">
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/et_edit_officer_phone"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="phone"/>
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <!-- Địa chỉ -->
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/layout_edit_officer_address"
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:hint="Địa chỉ">
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/et_edit_officer_address"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="textPostalAddress|textCapSentences"/>
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <!-- Số CCCD/CMND (Hiển thị, không cho sửa) -->
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/layout_edit_officer_national_id"
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:hint="Số CCCD/CMND">
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/et_edit_officer_national_id"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="none"
+                        android:focusable="false"
+                        android:clickable="false"/>
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <!-- Ngày sinh -->
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/layout_edit_officer_dob"
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    app:endIconMode="custom"
+                    app:endIconDrawable="@android:drawable/ic_menu_my_calendar"
+                    android:hint="Ngày sinh">
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/et_edit_officer_dob"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="none"
+                        android:focusable="false"
+                        android:clickable="true"/>
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <!-- Giới tính -->
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/layout_edit_officer_gender"
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:hint="Giới tính">
+                    <AutoCompleteTextView
+                        android:id="@+id/act_edit_officer_gender"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="none"/>
+                </com.google.android.material.textfield.TextInputLayout>
+
+            </LinearLayout>
+        </androidx.core.widget.NestedScrollView>
+
+        <FrameLayout
+            android:id="@+id/btn_save_officer_container"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:background="@android:color/white"
+            android:elevation="8dp">
+
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/btn_save_officer_info"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Lưu thay đổi"
+                android:layout_margin="16dp"
+                android:paddingVertical="12dp"
+                android:background="@drawable/bg_btn_gradient_green_vertical"
+                android:textColor="@android:color/white"/>
+        </FrameLayout>
+    </RelativeLayout>
+
+    <include layout="@layout/progress_overlay"/>
+
+</RelativeLayout>
