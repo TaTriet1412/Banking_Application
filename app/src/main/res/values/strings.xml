@@ -44,4 +44,5 @@
     <string name="otp_verification_success">Xác thực thành công!</string>
     <string name="otp_expired">Mã OTP đã hết hạn. Vui lòng gửi lại.</string>
     <string name="title_activity_edit_customer_info">Sửa Thông Tin Khách Hàng</string>
+    <string name="default_notification_channel_id" translatable="false">customer_transaction_updates_channel</string>
 </resources>

@@ -1,9 +1,12 @@
 package com.example.bankingapplication;
 
+import android.app.AlertDialog;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
-import android.content.Intent; // Thêm nếu bạn đã thêm logic mở TransactionHistoryActivity
+import android.content.Intent;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -15,49 +18,62 @@ import android.widget.TextView;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.widget.AppCompatButton;
 import androidx.fragment.app.Fragment;
+import android.content.pm.PackageManager;
+import androidx.core.content.ContextCompat;
+import androidx.core.app.ActivityCompat;
 
 import com.example.bankingapplication.DepositWithdrawDialogFragment;
+import com.google.firebase.functions.FirebaseFunctions;
+import com.google.firebase.functions.HttpsCallableResult;
 import com.example.bankingapplication.Firebase.Firestore;
 import com.example.bankingapplication.Object.Account;
 import com.example.bankingapplication.Object.CheckingAccount;
 import com.example.bankingapplication.Object.TransactionData;
 import com.example.bankingapplication.Object.User;
+import com.example.bankingapplication.Object.Bill; // Thêm Bill nếu bạn tạo Bill cho nạp/rút
 import com.example.bankingapplication.R;
 import com.example.bankingapplication.Utils.GlobalVariables;
 import com.example.bankingapplication.Utils.NumberFormat;
 import com.google.android.material.button.MaterialButton;
-import com.google.firebase.Timestamp;
+import com.google.firebase.Timestamp; // Import Timestamp
 
 import java.util.HashMap;
 import java.util.Map;
 
 public class CustomerCheckingAccountFragment extends Fragment implements DepositWithdrawDialogFragment.DepositWithdrawListener {
 
+    private static final String TAG = "CustCheckingFrag";
+    private FirebaseFunctions mFunctions;// Tag cho logging
+
     private CheckingAccount checkingAccountData;
+
+    private static final int TRANSACTION_NOTIFICATION_ID = 1001;
+    private static final int NOTIFICATION_PERMISSION_REQUEST_CODE = 123;
     private String accountNumber;
     private String parentAccountId; // ID của Account cha (chính là Account của khách hàng đang xem)
 
-    private TextView tvTotalBalance, tvAccountNumber_officer, tvBalanceDetail_officer; // Đổi tên để tránh nhầm lẫn nếu bạn copy-paste
+    private TextView tvTotalBalance, tvAccountNumber_officer, tvBalanceDetail_officer;
     private ImageView ivCopyAccNum_officer, ivViewDetailsArrow_officer;
     private Button btnDefaultAccountIndicator_officer;
     private MaterialButton btnOfficerDeposit, btnOfficerWithdraw;
 
-
-    // KEY MỚI CHO PARENT ACCOUNT ID
+    private static final String ARG_BALANCE = "balance";
+    private static final String ARG_ACCOUNT_NUMBER = "accountNumber";
     private static final String ARG_PARENT_ACCOUNT_ID_CHECKING = "parent_account_id_checking";
 
-    // Cập nhật newInstance
+
     public static CustomerCheckingAccountFragment newInstance(CheckingAccount checkingAcc, String accNum, String parentAccIdParam) {
         CustomerCheckingAccountFragment fragment = new CustomerCheckingAccountFragment();
         Bundle args = new Bundle();
         if (checkingAcc != null) {
-            args.putInt("balance", checkingAcc.getBalance() != null ? checkingAcc.getBalance() : 0);
+            args.putInt(ARG_BALANCE, checkingAcc.getBalance() != null ? checkingAcc.getBalance() : 0);
         } else {
-            args.putInt("balance", 0);
+            args.putInt(ARG_BALANCE, 0);
         }
-        args.putString("accountNumber", accNum);
-        args.putString(ARG_PARENT_ACCOUNT_ID_CHECKING, parentAccIdParam); // Truyền parentAccountId
+        args.putString(ARG_ACCOUNT_NUMBER, accNum);
+        args.putString(ARG_PARENT_ACCOUNT_ID_CHECKING, parentAccIdParam);
         fragment.setArguments(args);
         return fragment;
     }
@@ -66,16 +82,16 @@ public class CustomerCheckingAccountFragment extends Fragment implements Deposit
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
-            int balance = getArguments().getInt("balance", 0);
-            accountNumber = getArguments().getString("accountNumber", "N/A");
-            parentAccountId = getArguments().getString(ARG_PARENT_ACCOUNT_ID_CHECKING); // Lấy parentAccountId
+            int balance = getArguments().getInt(ARG_BALANCE, 0);
+            accountNumber = getArguments().getString(ARG_ACCOUNT_NUMBER, "N/A");
+            parentAccountId = getArguments().getString(ARG_PARENT_ACCOUNT_ID_CHECKING);
             checkingAccountData = new CheckingAccount(balance);
-            Log.d("CustCheckingFrag", "onCreate: parentAccountId received: " + parentAccountId);
+            Log.d(TAG, "onCreate: parentAccountId received: " + parentAccountId + ", AccountNumber: " + accountNumber);
         } else {
             checkingAccountData = new CheckingAccount(0);
             accountNumber = "N/A";
             parentAccountId = null;
-            Log.w("CustCheckingFrag", "onCreate: Arguments bundle is null.");
+            Log.w(TAG, "onCreate: Arguments bundle is null.");
         }
     }
 
@@ -99,6 +115,7 @@ public class CustomerCheckingAccountFragment extends Fragment implements Deposit
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        mFunctions = FirebaseFunctions.getInstance();
         displayAccountInfo();
         setupClickListeners();
     }
@@ -128,11 +145,14 @@ public class CustomerCheckingAccountFragment extends Fragment implements Deposit
         });
 
         ivViewDetailsArrow_officer.setOnClickListener(v -> {
-            // Mở TransactionHistoryActivity nếu cần
-            if (getActivity() != null) {
+            if (getActivity() != null && parentAccountId != null) {
                 // Intent intent = new Intent(getActivity(), TransactionHistoryActivity.class);
+                // intent.putExtra("ACCOUNT_ID_FOR_HISTORY", parentAccountId); // Truyền ID tài khoản khách hàng
                 // startActivity(intent);
-                Toast.makeText(getContext(), "Xem lịch sử giao dịch (Checking)", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getContext(), "Xem lịch sử (Checking) cho TK: " + parentAccountId, Toast.LENGTH_SHORT).show();
+
+            } else {
+                Toast.makeText(getContext(), "Không thể mở lịch sử giao dịch.", Toast.LENGTH_SHORT).show();
             }
         });
 
@@ -141,7 +161,7 @@ public class CustomerCheckingAccountFragment extends Fragment implements Deposit
     }
 
     private void showDepositWithdrawDialog(boolean isDeposit) {
-        String customerNameToPass = "Khách hàng";
+        String customerNameToPass = "Khách hàng"; // Default name
         if (getParentFragment() instanceof CustomerDetailsFragment) {
             User customerUser = ((CustomerDetailsFragment) getParentFragment()).getCurrentLoadedUser();
             if (customerUser != null && customerUser.getName() != null) {
@@ -160,24 +180,28 @@ public class CustomerCheckingAccountFragment extends Fragment implements Deposit
     }
 
     @Override
-    public void onConfirmTransaction(boolean isDeposit, int amount, String officerPin) {
-        // ... (logic xác thực PIN nhân viên của bạn ở đây) ...
-        // User currentOfficer = GlobalVariables.getInstance().getCurrentUser(); // Nhân viên đang đăng nhập
-        // Account officerAccount = GlobalVariables.getInstance().getOfficerAccount(); // Cần có cách lấy tài khoản của officer
-        // if (currentOfficer == null || officerAccount == null || !officerPin.equals(officerAccount.getPinCode())) {
-        //    Toast.makeText(getContext(), "Mã PIN nhân viên không đúng!", Toast.LENGTH_SHORT).show();
-        //    return;
-        // }
-        Toast.makeText(getContext(), "PIN nhân viên hợp lệ (giả định). Đang xử lý " + (isDeposit ? "nạp tiền..." : "rút tiền..."), Toast.LENGTH_SHORT).show();
-
+    public void onTransactionConfirmedByOfficer(boolean isDeposit, int amount) {
+        Log.d(TAG, "onTransactionConfirmedByOfficer called. IsDeposit: " + isDeposit + ", Amount: " + amount);
+        // OTP nhân viên đã được xác thực trong DialogFragment
 
         if (parentAccountId == null || parentAccountId.isEmpty()) {
             Toast.makeText(getContext(), "Lỗi: Không xác định được tài khoản khách hàng để cập nhật.", Toast.LENGTH_SHORT).show();
-            Log.e("CustCheckingFrag", "parentAccountId is null or empty in onConfirmTransaction.");
+            Log.e(TAG, "parentAccountId is null or empty in onTransactionConfirmedByOfficer.");
+            return;
+        }
+        if (getContext() == null) {
+            Log.e(TAG, "Context is null in onTransactionConfirmedByOfficer. Fragment might be detached.");
             return;
         }
 
+        Toast.makeText(getContext(), "Đang xử lý " + (isDeposit ? "nạp tiền..." : "rút tiền..."), Toast.LENGTH_SHORT).show();
+
+
         Firestore.getAccount(parentAccountId, customerAccount -> {
+            if (!isAdded() || getContext() == null) { // Kiểm tra lại fragment có còn attached không
+                Log.w(TAG, "Fragment not attached or context is null after getting customer account.");
+                return;
+            }
             if (customerAccount == null || customerAccount.getChecking() == null) {
                 Toast.makeText(getContext(), "Lỗi: Không thể tải thông tin tài khoản khách hàng.", Toast.LENGTH_SHORT).show();
                 return;
@@ -188,7 +212,7 @@ public class CustomerCheckingAccountFragment extends Fragment implements Deposit
 
             if (isDeposit) {
                 newBalance = currentBalance + amount;
-            } else {
+            } else { // Withdraw
                 if (currentBalance < amount) {
                     Toast.makeText(getContext(), "Số dư khách hàng không đủ để rút tiền.", Toast.LENGTH_SHORT).show();
                     return;
@@ -200,13 +224,30 @@ public class CustomerCheckingAccountFragment extends Fragment implements Deposit
             updates.put("checking.balance", newBalance);
 
             Firestore.updateAccountFields(parentAccountId, updates, (isSuccess, e) -> {
+                if (!isAdded() || getContext() == null) {
+                    Log.w(TAG, "Fragment not attached or context is null after updating account fields.");
+                    return;
+                }
                 if (isSuccess) {
                     String transactionType = isDeposit ? "deposit" : "withdrawal";
-                    String description = (isDeposit ? "NV nạp tiền vào TK " : "NV rút tiền từ TK ") + customerAccount.getAccountNumber();
-                    User officer = GlobalVariables.getInstance().getCurrentUser();
-                    String officerInfoForDesc = (officer != null && officer.getName() != null) ? " bởi " + officer.getName() : "";
-                    description += officerInfoForDesc;
+                    User officer = GlobalVariables.getInstance().getCurrentUser(); // Nhân viên đang thực hiện
+                    String officerName = (officer != null && officer.getName() != null) ? officer.getName() : "Nhân viên";
 
+                    String customerDisplayName = customerAccount.getUserId(); // Lấy tên KH nếu có, nếu không thì tạm dùng ID
+                    if (getParentFragment() instanceof CustomerDetailsFragment) {
+                        User customerUser = ((CustomerDetailsFragment) getParentFragment()).getCurrentLoadedUser();
+                        if (customerUser != null && customerUser.getName() != null) {
+                            customerDisplayName = customerUser.getName();
+                        }
+                    }
+
+                    String description = String.format("NV %s %s %s cho KH %s (STK: %s).",
+                            officerName,
+                            isDeposit ? "nạp" : "rút",
+                            NumberFormat.convertToCurrencyFormatOnlyNumber(amount), // Chỉ lấy số, không có VNĐ
+                            customerDisplayName,
+                            customerAccount.getAccountNumber()
+                    );
 
                     TransactionData transaction = new TransactionData(
                             Firestore.generateId("TR"),
@@ -215,29 +256,143 @@ public class CustomerCheckingAccountFragment extends Fragment implements Deposit
                             "completed",
                             description,
                             Timestamp.now(),
-                            isDeposit ? null : parentAccountId, // From: KH nếu rút, null nếu nạp tại quầy
-                            isDeposit ? parentAccountId : null  // To: KH nếu nạp, null nếu rút tại quầy
+                            isDeposit ? null : parentAccountId,
+                            isDeposit ? parentAccountId : null
                     );
-                    // if (officer != null) transaction.setOfficerId(officer.getUID()); // Gán ID nhân viên nếu có
+                    // if (officer != null) transaction.setOfficerId(officer.getUID()); // Nếu có trường này
 
-                    Firestore.addEditTransaction(transaction, isTransactionSuccess -> { // Chỉ nhận một tham số isTransactionSuccess
+                    Firestore.addEditTransaction(transaction, isTransactionSuccess -> { // Chỉ nhận 1 tham số
+                        if (!isAdded() || getContext() == null) {
+                            Log.w(TAG, "Fragment not attached or context is null after adding transaction.");
+                            return;
+                        }
                         if (isTransactionSuccess) {
-                            Toast.makeText(getContext(), (isDeposit ? "Nạp tiền" : "Rút tiền") + " thành công!", Toast.LENGTH_SHORT).show();
+                            showSuccessDialog(isDeposit, transaction.getAmount(), customerAccount.getAccountNumber());
                             checkingAccountData.setBalance(newBalance);
                             displayAccountInfo();
 
                             if (getParentFragment() instanceof CustomerDetailsFragment) {
                                 ((CustomerDetailsFragment) getParentFragment()).refreshCustomerDataOnDemand();
                             }
+                            String billTypeForBill = isDeposit ? "deposit_at_counter" : "withdrawal_at_counter";
+                            // GỌI VÀ TRUYỀN BILLTYPE VÀO
+                            createBillForDepositWithdraw(transaction, customerAccount, isDeposit, officerName, billTypeForBill);
                         } else {
+                            // Lỗi đã được ghi log trong Firestore.java
                             Toast.makeText(getContext(), "Lỗi ghi nhận giao dịch.", Toast.LENGTH_SHORT).show();
-                            // Bạn sẽ không có thông tin Exception cụ thể ở đây
                         }
                     });
                 } else {
-                    Toast.makeText(getContext(), "Lỗi cập nhật số dư khách hàng.", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getContext(), "Lỗi cập nhật số dư khách hàng." + (e != null ? " " + e.getMessage() : ""), Toast.LENGTH_SHORT).show();
                 }
             });
         });
+    }
+
+    private void showSuccessDialog(boolean isDeposit, int amount, String accountNumber) {
+        if (getContext() == null) return;
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+        LayoutInflater inflater = LayoutInflater.from(getContext());
+        View dialogView = inflater.inflate(R.layout.dialog_success_notification, null);
+
+        TextView tvSuccessMessage = dialogView.findViewById(R.id.tv_success_message_dialog);
+        AppCompatButton btnOk = dialogView.findViewById(R.id.btn_ok_success_dialog);
+
+        String operation = isDeposit ? "Nạp tiền" : "Rút tiền";
+        String message = operation + " " + NumberFormat.convertToCurrencyFormatHasUnit(amount) +
+                " vào tài khoản " + accountNumber + " thành công.";
+        tvSuccessMessage.setText(message);
+
+        builder.setView(dialogView);
+        builder.setCancelable(false); // Không cho hủy bằng nút back
+
+        AlertDialog successDialog = builder.create();
+        if (successDialog.getWindow() != null) {
+            successDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        }
+
+        btnOk.setOnClickListener(v -> successDialog.dismiss());
+        successDialog.show();
+    }
+
+    private void createBillForDepositWithdraw(TransactionData transaction, Account customerAccount, boolean isDeposit, String officerName, String billType) {
+        if (!isAdded() || getContext() == null) return;
+
+        // String billType = isDeposit ? "deposit_at_counter" : "withdrawal_at_counter"; // BỎ DÒNG NÀY VÌ ĐÃ TRUYỀN VÀO
+
+        String customerDisplayName = customerAccount.getUserId();
+        if (getParentFragment() instanceof CustomerDetailsFragment) {
+            User customerUser = ((CustomerDetailsFragment) getParentFragment()).getCurrentLoadedUser();
+            if (customerUser != null && customerUser.getName() != null) {
+                customerDisplayName = customerUser.getName();
+            }
+        }
+
+        String billDescription = String.format("GD %s %s tại quầy cho KH %s (STK: %s). Thực hiện bởi NV %s.",
+                isDeposit ? "nạp tiền" : "rút tiền",
+                NumberFormat.convertToCurrencyFormatOnlyNumber(transaction.getAmount()), // Chỉ lấy số
+                customerDisplayName,
+                customerAccount.getAccountNumber(),
+                officerName
+        );
+
+        Bill bill = new Bill(
+                Firestore.generateId("BI"),
+                transaction.getUID(),
+                transaction.getAmount(),
+                "completed",
+                Timestamp.now(),
+                "DW" + System.currentTimeMillis(),
+                "Tại quầy - 3TBank",
+                billType,                   // SỬ DỤNG THAM SỐ billType Ở ĐÂY
+                customerAccount.getUserId()
+        );
+
+        Firestore.addEditBill(bill, isBillSuccess -> {
+            if (isBillSuccess) {
+                Log.d(TAG, "Bill created successfully for " + billType + ": " + bill.getUID());
+                // Gọi hàm mới để kích hoạt gửi thông báo qua backend
+                triggerSendNotificationToCustomerViaCloudFunction(
+                        customerAccount.getUserId(), // ID của khách hàng
+                        (isDeposit ? "Tiền vào tài khoản" : "Tiền trừ từ tài khoản"), // Title cho notification
+                        String.format("Tài khoản %s của quý khách vừa %s %s. Thực hiện bởi NV %s.",
+                                customerAccount.getAccountNumber(),
+                                isDeposit ? "nhận" : "thực hiện rút",
+                                NumberFormat.convertToCurrencyFormatHasUnit(transaction.getAmount()),
+                                officerName), // Body cho notification
+                        transaction.getUID() // Transaction ID để deep link
+                );
+            } else {
+                Log.e(TAG, "Failed to create bill for " + billType);
+            }
+        });
+    }
+
+    private void triggerSendNotificationToCustomerViaCloudFunction(String customerUserId, String title, String body, String transactionId) {
+        if (getContext() == null) return;
+
+        Map<String, Object> data = new HashMap<>();
+        data.put("customerId", customerUserId);
+        data.put("title", title);
+        data.put("body", body);
+        data.put("transactionId", transactionId);
+
+        Log.d(TAG, "Calling Cloud Function 'sendTransactionNotificationToCustomer' with data: " + data.toString());
+
+        mFunctions
+                .getHttpsCallable("sendTransactionNotificationToCustomer") // Tên Cloud Function
+                .call(data)
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        HttpsCallableResult result = task.getResult();
+                        Log.i(TAG, "Cloud Function call successful: " + (result != null ? result.getData() : "No data returned"));
+                        // Toast.makeText(getContext(), "Yêu cầu gửi thông báo cho KH đã được gửi.", Toast.LENGTH_SHORT).show();
+                    } else {
+                        Exception e = task.getException();
+                        Log.e(TAG, "Cloud Function call failed.", e);
+                        Toast.makeText(getContext(), "Lỗi khi yêu cầu gửi thông báo cho khách hàng.", Toast.LENGTH_SHORT).show();
+                    }
+                });
     }
 }

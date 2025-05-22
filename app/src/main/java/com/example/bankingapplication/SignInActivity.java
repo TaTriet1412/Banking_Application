@@ -12,6 +12,7 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
 
+import com.google.firebase.messaging.FirebaseMessaging;
 import com.example.bankingapplication.Firebase.FirebaseAuth;
 import com.example.bankingapplication.Firebase.Firestore;
 import com.example.bankingapplication.Object.Account;
@@ -22,12 +23,15 @@ import com.example.bankingapplication.Utils.VariablesUtils;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException;
 import com.google.firebase.auth.FirebaseAuthInvalidUserException;
+import android.util.Log;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 
 public class SignInActivity extends AppCompatActivity {
     TextInputEditText edtPassword, edtEmail;
-
+    private static final String TAG = "SignInActivity";
     Button btnSignIn;
     Button btnSignUp;
 
@@ -81,56 +85,63 @@ public class SignInActivity extends AppCompatActivity {
                                     globalVariables.setCurrentUser(user);
 
                                     if(Objects.equals(user.getRole(), VariablesUtils.CUSTOMER_ROLE)) {
+                                        // <<<< GỌI LẤY VÀ LƯU TOKEN Ở ĐÂY >>>>
+                                        getTokenAndSaveToFirestore(user.getUID());
+                                        // <<<< KẾT THÚC GỌI >>>>
+
                                         Firestore.getAccountByUserId(user.getUID(), new Firestore.FirestoreGetAccountCallback() {
                                             @Override
                                             public void onCallback(Account account) {
                                                 if (account != null) {
                                                     globalVariables.setCurrentAccount(account);
-
-                                                    progressOverlay.setVisibility(View.GONE); // Ẩn loading overlay
+                                                    progressOverlay.setVisibility(View.GONE);
                                                     Intent intent = new Intent(SignInActivity.this, CustomerMainActivity.class);
                                                     startActivity(intent);
+                                                    finish(); // Kết thúc SignInActivity sau khi điều hướng
                                                 }   else {
-                                                    Toast.makeText(SignInActivity.this, "Không tìm thấy tài khoản", Toast.LENGTH_SHORT).show();
+                                                    progressOverlay.setVisibility(View.GONE);
+                                                    FirebaseAuth.signOut(); // Đăng xuất nếu không tìm thấy tài khoản liên kết
+                                                    GlobalVariables.getInstance().setCurrentUser(null); // Xóa user khỏi global
+                                                    Toast.makeText(SignInActivity.this, "Không tìm thấy tài khoản ngân hàng liên kết.", Toast.LENGTH_LONG).show();
                                                 }
                                             }
                                         });
                                     } else if (Objects.equals(user.getRole(), VariablesUtils.BANK_OFFICER_ROLE)) {
-                                        progressOverlay.setVisibility(View.GONE); // Ẩn loading overlay
+                                        progressOverlay.setVisibility(View.GONE);
                                         Intent intent = new Intent(SignInActivity.this, BankOfficerMainActivity.class);
                                         startActivity(intent);
+                                        finish(); // Kết thúc SignInActivity
                                     } else {
-                                        progressOverlay.setVisibility(View.GONE); // Ẩn loading overlay
-                                        Toast.makeText(SignInActivity.this, "Không tìm thấy vai trò", Toast.LENGTH_SHORT).show();
+                                        progressOverlay.setVisibility(View.GONE);
+                                        FirebaseAuth.signOut();
+                                        GlobalVariables.getInstance().setCurrentUser(null);
+                                        Toast.makeText(SignInActivity.this, "Vai trò người dùng không xác định.", Toast.LENGTH_SHORT).show();
                                     }
                                 } else {
-                                    progressOverlay.setVisibility(View.GONE); // Ẩn loading overlay
-                                    Toast.makeText(SignInActivity.this, "Không tìm thấy tài khoản", Toast.LENGTH_SHORT).show();
+                                    progressOverlay.setVisibility(View.GONE);
+                                    FirebaseAuth.signOut();
+                                    Toast.makeText(SignInActivity.this, "Không thể tải thông tin người dùng.", Toast.LENGTH_SHORT).show();
                                 }
                             }
                         });
+                    } else { // isSuccess là null hoặc false
+                        FirebaseAuth.signOut();
+                        progressOverlay.setVisibility(View.GONE);
+                        Toast.makeText(this, "Đăng nhập thất bại. Vui lòng thử lại.", Toast.LENGTH_SHORT).show();
                     }
-                    // Navigate to the next activity
-                } else {
-                    // Sign in failed
+                } else { // task không thành công (ví dụ: sai mật khẩu, email không tồn tại)
                     FirebaseAuth.signOut();
                     progressOverlay.setVisibility(View.GONE);
-                    Toast.makeText(this, "Không thể lấy thông tin tài khoản", Toast.LENGTH_SHORT).show();
-                }
-            }).addOnFailureListener(e -> {
-                progressOverlay.setVisibility(View.GONE); // Ẩn loading overlay
-                // Xử lý lỗi
-                if (e instanceof FirebaseAuthInvalidUserException || e instanceof FirebaseAuthInvalidCredentialsException) {
-                    edtEmail.setBackgroundResource(R.drawable.sign_in_frame_error_view);
-                    edtPassword.setBackgroundResource(R.drawable.sign_in_frame_error_view);
-                    tvError.setVisibility(View.VISIBLE);
-                    edtEmail.requestFocus();
-                    return;
-                }
-                else {
-                    Toast.makeText(SignInActivity.this, "Đã có lỗi xảy ra, vui lòng thử lại", Toast.LENGTH_SHORT).show();
-                    edtEmail.requestFocus();
-                    return;
+                    // Xử lý lỗi
+                    if (task.getException() instanceof FirebaseAuthInvalidUserException || task.getException() instanceof FirebaseAuthInvalidCredentialsException) {
+                        edtEmail.setBackgroundResource(R.drawable.sign_in_frame_error_view);
+                        edtPassword.setBackgroundResource(R.drawable.sign_in_frame_error_view);
+                        if (tvError != null) tvError.setVisibility(View.VISIBLE); // Kiểm tra tvError null
+                        edtEmail.requestFocus();
+                    } else {
+                        Toast.makeText(SignInActivity.this, "Đã có lỗi xảy ra: " + task.getException().getMessage(), Toast.LENGTH_LONG).show();
+                        edtEmail.requestFocus();
+                    }
                 }
             });
         });
@@ -141,5 +152,43 @@ public class SignInActivity extends AppCompatActivity {
             // Don't set CREATED_BY_OFFICER flag here since this is the normal user flow
             startActivity(intent);
         });
+    }
+
+    private void getTokenAndSaveToFirestore(String userId) {
+        if (userId == null || userId.isEmpty()) {
+            Log.w(TAG, "Cannot get/save FCM token, userId is null or empty.");
+            return;
+        }
+        FirebaseMessaging.getInstance().getToken()
+                .addOnCompleteListener(task -> {
+                    if (!task.isSuccessful()) {
+                        Log.w(TAG, "Fetching FCM registration token failed", task.getException());
+                        return;
+                    }
+                    // Get new FCM registration token
+                    String token = task.getResult();
+                    Log.d(TAG, "FCM Registration Token for user " + userId + ": " + token);
+                    saveTokenToFirestore(userId, token);
+                });
+    }
+
+    private void saveTokenToFirestore(String userId, String token) {
+        if (userId == null || token == null) return;
+
+        // Cách đơn giản: lưu token trực tiếp vào trường 'fcmToken' của user
+        Map<String, Object> userUpdates = new HashMap<>();
+        userUpdates.put("fcmToken", token);
+        // Nếu bạn muốn lưu chi tiết hơn (ví dụ: token và thời gian cập nhật):
+        // Map<String, Object> fcmTokenDetails = new HashMap<>();
+        // fcmTokenDetails.put("token", token);
+        // fcmTokenDetails.put("lastUpdated", Timestamp.now());
+        // userUpdates.put("fcmTokenDetails", fcmTokenDetails); // Lưu vào một map con
+
+        // Sử dụng lớp Firestore của bạn (nếu có phương thức update tiện lợi)
+        // Hoặc dùng FirebaseFirestore.getInstance() trực tiếp
+        com.google.firebase.firestore.FirebaseFirestore.getInstance().collection("users").document(userId)
+                .update(userUpdates) // Hoặc .set(userUpdates, SetOptions.merge()) để tạo trường nếu chưa có
+                .addOnSuccessListener(aVoid -> Log.d(TAG, "FCM Token successfully written/updated for user: " + userId))
+                .addOnFailureListener(e -> Log.w(TAG, "Error writing/updating FCM token for user: " + userId, e));
     }
 }

@@ -66,11 +66,14 @@ dependencies {
     implementation("io.github.chaosleung:pinview:1.4.4")
 
     implementation(platform("com.google.firebase:firebase-bom:33.4.0"))
+    // Firebase Cloud Messaging
+    implementation("com.google.firebase:firebase-messaging")
     implementation ("androidx.browser:browser:1.5.0")
     // Thêm các phụ thuộc các dịch vụ cụ thể của Firebase
     implementation("com.google.firebase:firebase-auth") // Firebase Authentication
     implementation("com.google.firebase:firebase-storage") // Firebase Storage
     implementation("com.google.firebase:firebase-firestore") // Firebase Firestore
+    implementation("com.google.firebase:firebase-functions")
 
     implementation("com.google.firebase:firebase-appcheck-playintegrity")
     implementation("com.google.firebase:firebase-appcheck-debug")
