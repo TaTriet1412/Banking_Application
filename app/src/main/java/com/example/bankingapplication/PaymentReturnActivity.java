@@ -35,6 +35,7 @@ import com.example.bankingapplication.Firebase.Firestore;
 import com.example.bankingapplication.Object.Account;
 import com.example.bankingapplication.Object.Bill;
 import com.example.bankingapplication.Object.TransactionData;
+import com.example.bankingapplication.Object.User;
 import com.example.bankingapplication.Utils.BillUtils;
 import com.example.bankingapplication.Utils.GlobalVariables;
 import com.example.bankingapplication.Utils.TransactionUtils;
@@ -74,6 +75,7 @@ public class PaymentReturnActivity extends AppCompatActivity {
     private String displayAmount;
     private String displayDateTime;
     private FrameLayout progressOverlay;
+    private User currentUser;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -103,7 +105,7 @@ public class PaymentReturnActivity extends AppCompatActivity {
 
         // Show progress overlay initially while processing
         progressOverlay.setVisibility(View.VISIBLE);
-
+        currentUser = GlobalVariables.getInstance().getCurrentUser();
         Intent receivedIntent = getIntent();
         Uri data = receivedIntent.getData();
 
@@ -433,7 +435,8 @@ public class PaymentReturnActivity extends AppCompatActivity {
         if (bill != null) {
             detailsMap.put("Loại hóa đơn", bill.getType() != null ? BillUtils.translateBillType(bill.getType()) : "N/A");
             detailsMap.put("Nhà cung cấp", bill.getProvider() != null ? bill.getProvider() : "N/A");
-            String customerId = bill.getUserId();
+            detailsMap.put("Nhà cung cấp", bill.getProvider() != null ? bill.getProvider() : "N/A");
+            String customerId = currentUser.getUID();
             if (customerId != null) {
                 int maxLength = 15;
                 if (customerId.length() > maxLength) {
@@ -517,7 +520,7 @@ public class PaymentReturnActivity extends AppCompatActivity {
 
     private void addDetailRow(LinearLayout container, String label, String value) {
         LayoutInflater inflater = LayoutInflater.from(this);
-        RelativeLayout rowLayout = (RelativeLayout) inflater.inflate(R.layout.item_transaction_detail_row, container, false);
+        LinearLayout rowLayout = (LinearLayout) inflater.inflate(R.layout.item_transaction_detail_row, container, false);
         TextView tvLabel = rowLayout.findViewById(R.id.tvDetailLabel);
         TextView tvValue = rowLayout.findViewById(R.id.tvDetailValue);
         tvLabel.setText(label);

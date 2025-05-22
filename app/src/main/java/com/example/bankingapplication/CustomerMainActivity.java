@@ -48,11 +48,7 @@ public class CustomerMainActivity extends AppCompatActivity {
         tv_user_name = findViewById(R.id.tv_user_name);
         tv_account_number = findViewById(R.id.tv_account_number);
         tv_balance = findViewById(R.id.tv_balance);
-
-        // <<<<<< ÁNH XẠ VIEW MỚI CHO CHỨC NĂNG BẢN ĐỒ >>>>>>
         ll_nearby_branches_feature = findViewById(R.id.ll_nearby_branches_feature);
-        // >>>>>> THÊM VIEW MỚI CHO CHỨC NĂNG BẢN ĐỒ <<<<<<
-
         ll_pay_electricity_bill_feature = findViewById(R.id.ll_pay_electricity_bill_feature);
 
         currentAccount = GlobalVariables.getInstance().getCurrentAccount();
