@@ -53,10 +53,14 @@ android {
 dependencies {
     implementation("io.github.chaosleung:pinview:1.4.4")
     implementation(platform("com.google.firebase:firebase-bom:33.4.0"))
+    // Firebase Cloud Messaging
+    implementation("com.google.firebase:firebase-messaging")
     implementation ("androidx.browser:browser:1.5.0")
     implementation("com.google.firebase:firebase-auth")
     implementation("com.google.firebase:firebase-storage")
-    implementation("com.google.firebase:firebase-firestore")
+    implementation("com.google.firebase:firebase-firestore")    
+    implementation("com.google.firebase:firebase-functions")
+    testImplementation ("org.mockito:mockito-core:4.2.0")
     implementation("com.google.firebase:firebase-appcheck-playintegrity")
     implementation("com.google.firebase:firebase-appcheck-debug")
     implementation ("com.github.bumptech.glide:glide:4.15.1")

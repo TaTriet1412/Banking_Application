@@ -7,6 +7,15 @@
 
     <style name="Theme.BankingApplication" parent="Base.Theme.BankingApplication" />
 
+    <!-- Add this theme that properly handles system windows -->
+    <style name="Theme.BankingApplication.SystemWindows" parent="Theme.MaterialComponents.Light.NoActionBar">
+        <item name="android:windowTranslucentStatus">false</item>
+        <item name="android:windowDrawsSystemBarBackgrounds">true</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:windowLightStatusBar" tools:targetApi="23">false</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+    </style>
+
     <style name="Text">
         <item name="android:fontFamily">@font/lato_regular</item>
         <item name="android:textColor">@color/text_default</item>

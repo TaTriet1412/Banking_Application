@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="8dp"
+    app:cardCornerRadius="8dp"
+    app:cardElevation="2dp"
+    app:cardBackgroundColor="@color/white">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="12dp"
+        android:background="?attr/selectableItemBackground">
+        
+        <ImageView
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_gravity="center_vertical"
+            android:src="@drawable/ic_interest_earnings"
+            android:background="@drawable/circle_green_background"
+            android:padding="8dp"
+            app:tint="@color/white"
+            android:layout_marginEnd="12dp"
+            android:contentDescription="Lãi suất" />
+        
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/tv_interest_period"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:textColor="@color/text_color_primary_dark"
+                tools:text="Tháng 03/2023" />
+
+            <TextView
+                android:id="@+id/tv_interest_amount"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/green_primary"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:layout_marginTop="2dp"
+                tools:text="+ 250.000 VNĐ" />
+            
+            <TextView
+                android:id="@+id/tv_interest_rate"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="12sp"
+                android:textColor="@color/text_color_secondary_dark"
+                android:layout_marginTop="4dp"
+                tools:text="Lãi suất: 3.2%" />
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/tv_interest_date"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:textColor="@color/text_color_secondary_dark"
+            android:textSize="12sp"
+            tools:text="15/03/2023" />
+    </LinearLayout>
+</androidx.cardview.widget.CardView>

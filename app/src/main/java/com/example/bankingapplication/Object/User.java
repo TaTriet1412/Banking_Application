@@ -18,6 +18,8 @@ public class User implements Serializable {
 
     private Biometric biometricData;
 
+    private String fcmToken;
+
     public User() {
         // Default constructor required for calls to DataSnapshot.getValue(User.class)
     }
@@ -129,7 +131,13 @@ public class User implements Serializable {
             return "Nữ";
         }
     }
+    public String getFcmToken() {
+        return fcmToken;
+    }
 
+    public void setFcmToken(String fcmToken) {
+        this.fcmToken = fcmToken;
+    }
 
     public String getNationalId() {
         return nationalId;
