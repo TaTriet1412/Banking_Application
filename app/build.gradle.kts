@@ -1,7 +1,11 @@
+import java.io.FileInputStream
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     id("com.google.gms.google-services")
 }
+
 
 android {
     namespace = "com.example.bankingapplication"
@@ -15,6 +19,8 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        // <<<<<< THÊM DÒNG NÀY ĐỂ ĐỊNH NGHĨA BIẾN TRONG BUILDCONFIG >>>>>>
+        buildConfigField("String", "DIRECTIONS_API_KEY", "\"${getApiKey("GOOGLE_DIRECTIONS_API_KEY")}\"")
     }
 
     buildTypes {
@@ -35,7 +41,24 @@ android {
         resources.excludes.add("META-INF/*")
     }
 }
-
+// <<<<<< THÊM HÀM NÀY Ở NGOÀI KHỐI android { ... } >>>>>>
+// Hàm để đọc key từ local.properties
+// Hàm getApiKey viết bằng Kotlin
+fun getApiKey(propertyName: String): String {
+    val properties = Properties()
+    val localPropertiesFile = rootProject.file("local.properties") // Sử dụng rootProject.file
+    if (localPropertiesFile.exists()) {
+        try {
+            properties.load(FileInputStream(localPropertiesFile))
+            return properties.getProperty(propertyName, "")
+        } catch (e: Exception) {
+            println("Warning: Could not load local.properties file. ${e.message}")
+        }
+    } else {
+        println("Warning: local.properties file not found. API keys might not be loaded.")
+    }
+    return ""
+}
 dependencies {
     implementation("io.github.chaosleung:pinview:1.4.4")
 
@@ -58,6 +81,9 @@ dependencies {
     implementation("com.google.android.gms:play-services-maps:18.2.0")
     implementation("com.google.android.gms:play-services-location:21.2.0")
     implementation ("com.google.android.material:material:1.12.0")
+    implementation ("com.squareup.retrofit2:retrofit:2.9.0'")
+    implementation ("com.squareup.retrofit2:converter-gson:2.9.0")
+    implementation ("com.google.maps.android:android-maps-utils:2.3.0")
     implementation(libs.appcompat)
     implementation(libs.material)
     implementation(libs.activity)

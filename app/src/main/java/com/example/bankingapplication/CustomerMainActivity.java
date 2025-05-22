@@ -21,7 +21,7 @@ public class CustomerMainActivity extends AppCompatActivity {
     ImageView iv_user_icon, iv_copy_account_number, iv_toggle_balance,
             iv_charge_phone;
 
-    LinearLayout ll_transaction_history, ll_account, ll_transfer_money_feature, ll_nearby_branches_feature, ll_pay_electricity_bill_feature;
+    LinearLayout ll_transaction_history, ll_account, ll_transfer_money_feature, ll_nearby_branches_feature, ll_pay_electricity_bill_feature, ll_pay_water_bill_feature;
 
     TextView tv_user_name, tv_account_number, tv_balance;
     FrameLayout progressOverlay;
@@ -49,7 +49,9 @@ public class CustomerMainActivity extends AppCompatActivity {
         ll_nearby_branches_feature = findViewById(R.id.ll_nearby_branches_feature);
         // >>>>>> THÊM VIEW MỚI CHO CHỨC NĂNG BẢN ĐỒ <<<<<<
 
+        // <<<<<< ÁNH XẠ VIEW MỚI CHO CHỨC NĂNG THANH TOÁN TIỀN ĐIỆN VÀ NƯỚC >>>>>>
         ll_pay_electricity_bill_feature = findViewById(R.id.ll_pay_electricity_bill_feature);
+        ll_pay_water_bill_feature = findViewById(R.id.ll_pay_water_bill_feature);
 
         currentAccount = GlobalVariables.getInstance().getCurrentAccount();
         currentUser = GlobalVariables.getInstance().getCurrentUser();
@@ -73,6 +75,7 @@ public class CustomerMainActivity extends AppCompatActivity {
         phoneClick();
         nearbyBranchesFeatureClick(); // <<<<<< GỌI PHƯƠNG THỨC XỬ LÝ CLICK MỚI
         payElectricityBillFeatureClick();
+        payWaterBillFeatureClick();
     }
 
     @SuppressLint("SetTextI18n")
@@ -134,6 +137,13 @@ public class CustomerMainActivity extends AppCompatActivity {
     private void payElectricityBillFeatureClick() {
         ll_pay_electricity_bill_feature.setOnClickListener(v -> {
             Intent intent = new Intent(CustomerMainActivity.this, PayElectricityBillActivity.class);
+            startActivity(intent);
+        });
+    }
+
+    private void payWaterBillFeatureClick() {
+        ll_pay_water_bill_feature.setOnClickListener(v -> {
+            Intent intent = new Intent(CustomerMainActivity.this, PayWaterBillActivity.class);
             startActivity(intent);
         });
     }
