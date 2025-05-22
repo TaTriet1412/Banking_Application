@@ -6,6 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
+    android:fitsSystemWindows="true"
     android:background="@color/window_background_color"
     tools:context=".TransactionHistoryActivity">
 
@@ -19,7 +20,7 @@
             android:layout_height="?attr/actionBarSize"
             android:background="@color/green_primary"
             app:navigationIcon="@drawable/ic_arrow_back_white_24dp"
-            app:title="Tài khoản thanh toán"
+            app:title="Lịch sử giao dịch"
             app:titleTextColor="@android:color/white" />
     </com.google.android.material.appbar.AppBarLayout>
 
