@@ -74,7 +74,7 @@ dependencies {
     implementation("com.google.firebase:firebase-auth") // Firebase Authentication
     implementation("com.google.firebase:firebase-storage") // Firebase Storage
     implementation("com.google.firebase:firebase-firestore") // Firebase Firestore
-
+    testImplementation ("org.mockito:mockito-core:4.2.0")
     implementation("com.google.firebase:firebase-appcheck-playintegrity")
     implementation("com.google.firebase:firebase-appcheck-debug")
     implementation ("com.github.bumptech.glide:glide:4.15.1")
