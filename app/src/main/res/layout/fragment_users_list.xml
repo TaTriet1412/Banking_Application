@@ -7,42 +7,55 @@
     android:padding="@dimen/staff_list_item_spacing_outer"
     tools:context=".UsersListFragment">
 
-<androidx.recyclerview.widget.RecyclerView
-android:id="@+id/recyclerViewUsers"
-android:layout_width="0dp"
-android:layout_height="0dp"
-app:layout_constraintTop_toTopOf="parent"
-app:layout_constraintBottom_toBottomOf="parent"
-app:layout_constraintStart_toStartOf="parent"
-app:layout_constraintEnd_toEndOf="parent"
-tools:listitem="@layout/item_user_card"/>
-
-<ProgressBar
-android:id="@+id/progressBar_users_list"
-style="?android:attr/progressBarStyle"
-android:layout_width="wrap_content"
-android:layout_height="wrap_content"
-android:visibility="gone"
-app:layout_constraintTop_toTopOf="parent"
-app:layout_constraintBottom_toBottomOf="parent"
-app:layout_constraintStart_toStartOf="parent"
-app:layout_constraintEnd_toEndOf="parent"
-tools:visibility="visible"/>
-
-    <!-- THÊM TEXTVIEW NÀY VÀO -->
-<TextView
-android:id="@+id/tv_no_customers"
-android:layout_width="wrap_content"
-android:layout_height="wrap_content"
-android:text="Không có khách hàng nào."
-android:textSize="16sp"
-android:textColor="?android:attr/textColorSecondary"
-android:visibility="gone"
+    <!-- THÊM Ô TÌM KIẾM VÀO ĐÂY -->
+    <androidx.appcompat.widget.SearchView
+        android:id="@+id/search_view_customers"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        app:iconifiedByDefault="false"
+        app:queryHint="Tìm kiếm theo tên hoặc email..."
+        android:background="@drawable/search_view_background"
     app:layout_constraintTop_toTopOf="parent"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintEnd_toEndOf="parent" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerViewUsers"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="8dp"
+        app:layout_constraintTop_toBottomOf="@id/search_view_customers"
     app:layout_constraintBottom_toBottomOf="parent"
     app:layout_constraintStart_toStartOf="parent"
     app:layout_constraintEnd_toEndOf="parent"
-    tools:visibility="gone"/>
+    tools:listitem="@layout/item_user_card"/>
+
+    <ProgressBar
+        android:id="@+id/progressBar_users_list"
+        style="?android:attr/progressBarStyle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        app:layout_constraintTop_toBottomOf="@id/search_view_customers"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        tools:visibility="visible"/>
+
+    <TextView
+        android:id="@+id/tv_no_customers"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Không có khách hàng nào."
+        android:textSize="16sp"
+        android:textColor="?android:attr/textColorSecondary"
+        android:visibility="gone"
+        app:layout_constraintTop_toBottomOf="@id/search_view_customers"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        tools:visibility="gone"/>
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fab_add_customer"
@@ -50,11 +63,11 @@ android:visibility="gone"
         android:layout_height="wrap_content"
         android:layout_margin="16dp"
         android:src="@drawable/ic_add_user"
-    app:fabCustomSize="72dp"
-    app:maxImageSize="36dp"
-    app:tint="@null"
-    app:layout_constraintBottom_toBottomOf="parent"
-    app:layout_constraintEnd_toEndOf="parent"
-    android:contentDescription="Tạo khách hàng mới"/>
+        app:fabCustomSize="72dp"
+        app:maxImageSize="36dp"
+        app:tint="@null"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:contentDescription="Tạo khách hàng mới"/>
 
-    </androidx.constraintlayout.widget.ConstraintLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

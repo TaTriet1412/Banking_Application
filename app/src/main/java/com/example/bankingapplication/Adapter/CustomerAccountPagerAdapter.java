@@ -42,7 +42,8 @@ public class CustomerAccountPagerAdapter extends FragmentStateAdapter {
                 Log.d("PagerAdapter", "Checking data for pos 0: " + (accountData.getChecking() != null ? "Exists" : "NULL"));
                 return CustomerCheckingAccountFragment.newInstance(
                         accountData.getChecking(),
-                        accountData.getAccountNumber()
+                        accountData.getAccountNumber(),
+                        accountData.getUID()
                 );
             case 1: // Tiết kiệm
                 Log.d("PagerAdapter", "Saving data for pos 1: " + (accountData.getSaving() != null ? "Exists" : "NULL"));

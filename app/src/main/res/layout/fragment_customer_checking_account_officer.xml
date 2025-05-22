@@ -137,6 +137,37 @@
                 android:backgroundTint="@color/light_green_background"
             android:textColor="@color/dark_green_text" />
 
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginTop="12dp">
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_officer_deposit_customer"
+                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Nạp tiền"
+                    app:icon="@drawable/ic_deposit"
+                app:iconTint="@null"
+                android:textColor="@color/green_primary"
+                android:layout_marginEnd="8dp"/>
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_officer_withdraw_customer"
+                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Rút tiền"
+                    app:icon="@drawable/ic_withdrawal"
+                app:iconTint="@null"
+                android:textColor="@color/red_error"
+                android:layout_marginStart="8dp"/>
+            </LinearLayout>
+
         </LinearLayout>
     </com.google.android.material.card.MaterialCardView>
 
