@@ -1,119 +1,108 @@
 // functions/index.js
-
 const functions = require("firebase-functions");
 const admin = require("firebase-admin");
 
-admin.initializeApp();
+// Khởi tạo Firebase Admin SDK một lần
+if (!admin.apps.length) {
+  admin.initializeApp();
+}
 
-const db = admin.firestore();
+const firestore = admin.firestore();
+const logger = functions.logger; // Sử dụng logger của Firebase Functions
 
-// Callable Function để gửi thông báo giao dịch đến khách hàng
-exports.sendTransactionNotificationToCustomer = functions.https.onCall(
-    async (data, context) => {
-    // TODO: Thêm xác thực mạnh mẽ hơn
-    // if (!context.auth || !context.auth.token ||
-    //     !context.auth.token.isOfficer) {
-    //   console.error(
-    //     "Authentication error: Caller is not an authenticated officer."
-    //   );
-    //   throw new functions.https.HttpsError(
-    //     "unauthenticated",
-    //     "The function must be called by an authenticated banking officer.",
-    //   );
-    // }
+/**
+ * Sends a transaction notification to a specific customer.
+ *
+ * @param {object} data The data passed to the function.
+ * @param {string} data.customerId The UID of the customer to notify.
+ * @param {string} data.title The title of the notification.
+ * @param {string} data.body The body of the notification.
+ * @param {string} [data.transactionId] Optional transaction ID for deep linking.
+ * @param {functions.https.CallableContext} context The context of the function call.
+ * @return {Promise<object>} A promise that resolves with the result of the send operation.
+ */
+exports.sendTransactionNotificationToCustomer = functions
+    .region("asia-southeast1") // Chỉ định region
+    .https.onCall(async (data, context) => {
+      logger.info("sendTransactionNotificationToCustomer CALLED with data:", data);
 
-      const customerId = data.customerId;
-      const title = data.title;
-      const body = data.body;
-      const transactionId = data.transactionId;
+      const {customerId, title, body, transactionId} = data;
 
-      if (!customerId || !title || !body) {
-        console.error(
-            "Missing required parameters: customerId, title, or body.",
-            "Received data:",
-            JSON.stringify(data), // Thêm dấu phẩy
-        );
+      if (!customerId) {
+        logger.error("Customer ID is required.");
         throw new functions.https.HttpsError(
             "invalid-argument",
-            "Missing required parameters: customerId, title, body.",
+            "Customer ID is required.",
+        );
+      }
+      if (!title || !body) {
+        logger.error("Title and body are required for notification.");
+        throw new functions.https.HttpsError(
+            "invalid-argument",
+            "Title and body are required.",
         );
       }
 
       try {
-        const userDoc = await db.collection("users").doc(customerId).get();
+        logger.info(`Attempting to get user document for customerId: ${customerId}`);
+        const userDocRef = firestore.collection("users").doc(customerId);
+        const userDoc = await userDocRef.get();
 
         if (!userDoc.exists) {
-          console.error(
-              "Customer user document not found for ID:",
-              customerId,
-          );
-          return {success: false, error: "Target customer not found."};
+          logger.error(`User document not found: ${customerId}`);
+          return {success: false, error: "User not found."};
         }
 
         const userData = userDoc.data();
-        const customerFcmToken = userData.fcmToken;
+        const fcmToken = userData.fcmToken;
+        logger.info(`User data fetched. FCM Token exists: ${fcmToken ? "Yes" : "No"}`);
 
-        if (
-          !customerFcmToken ||
-          typeof customerFcmToken !== "string" ||
-          customerFcmToken.trim() === ""
-        ) {
-          console.error(
-              "FCM token not found or invalid for customer:",
-              customerId,
-          );
-          return {
-            success: false,
-            error: "FCM token not available for this customer.",
-          };
+
+        if (!fcmToken) {
+          logger.warn(`FCM token not found for user: ${customerId}`);
+          return {success: false, error: "FCM token not found for user."};
         }
 
-        const payload = {
+        const messagePayload = { // Đây là data payload
           data: {
             title: title,
             body: body,
-            transactionId: transactionId || "",
-            // screenToOpen: "transaction_detail",
-            // notificationType: "CUSTOMER_TRANSACTION",
           },
-          token: customerFcmToken,
-          android: {
+          token: fcmToken,
+          android: { // Cấu hình Android
             priority: "high",
-            // notification: {
-            //   channel_id: "customer_transaction_updates_channel",
+            // notification: { // Không cần nếu client tự tạo notification
+            //   sound: "default",
             // },
           },
-          // apns: {
-          //   payload: {
-          //     aps: {
-          //       sound: "default",
-          //       badge: 1,
-          //     },
-          //   },
-          // },
         };
 
-        console.log(
-            "Attempting to send FCM message to token:",
-            customerFcmToken,
-            "with data payload:",
-            JSON.stringify(payload.data), // Thêm dấu phẩy
-        );
+        if (transactionId) {
+          messagePayload.data.transactionId = transactionId;
+        }
 
-        const response = await admin.messaging().send(payload);
-        console.log("Successfully sent message:", response);
+        logger.info(
+            `Attempting to send FCM message to token: ${fcmToken} with data:`,
+            messagePayload.data,
+        );
+        const response = await admin.messaging().send(messagePayload); // Sử dụng send() thay vì sendToDevice nếu chỉ có 1 token
+        logger.info("Successfully sent message:", response);
         return {success: true, messageId: response};
       } catch (error) {
-        console.error(
-            "Error sending FCM message for customer:",
-            customerId,
-            error, // Thêm dấu phẩy
-        );
+        logger.error("Error in sendTransactionNotificationToCustomer:", error);
         throw new functions.https.HttpsError(
             "internal",
-            "An unexpected error occurred while sending the notification.",
-            error.message, // Thêm dấu phẩy
+            "Failed to send notification.",
+            error.message, // Gửi message của lỗi
         );
       }
-    }, // Thêm dấu phẩy
-);
+    });
+
+// Ví dụ hàm test đơn giản
+exports.simpleCallableTestJS = functions
+    .region("asia-southeast1")
+    .https.onCall((data, context) => {
+      logger.info("simpleCallableTestJS CALLED with data:", data);
+      const clientName = data.name || "Guest";
+      return {status: `simpleCallableTestJS executed successfully for ${clientName}`};
+    });

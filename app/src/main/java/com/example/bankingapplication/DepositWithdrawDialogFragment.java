@@ -179,57 +179,38 @@ public class DepositWithdrawDialogFragment extends DialogFragment {
         return dialog;
     }
 
+    // Trong hàm populateQuickAmountButtons()
     private void populateQuickAmountButtons() {
         gridLayoutQuickAmounts.removeAllViews();
         quickAmountButtons.clear();
 
-        // Lấy kích thước màn hình để tính toán linh hoạt
-        int screenWidth = getResources().getDisplayMetrics().widthPixels;
-
-        // Padding của Dialog (ví dụ: 20dp mỗi bên như trong XML của bạn)
-        int dialogHorizontalPadding = dpToPx(20) * 2;
-
-        // Padding của chính GridLayout (nếu có, trong XML của bạn hiện không có)
-        int gridLayoutPaddingStart = gridLayoutQuickAmounts.getPaddingStart();
-        int gridLayoutPaddingEnd = gridLayoutQuickAmounts.getPaddingEnd();
-        int gridLayoutTotalHorizontalPadding = gridLayoutPaddingStart + gridLayoutPaddingEnd;
-
-        // Chiều rộng khả dụng cho nội dung bên trong GridLayout
-        int availableWidthForGridContent = screenWidth - dialogHorizontalPadding - gridLayoutTotalHorizontalPadding;
-
         int columnCount = gridLayoutQuickAmounts.getColumnCount();
-        if (columnCount <= 0) columnCount = 3; // Giá trị mặc định nếu XML không set
+        if (columnCount <= 0) columnCount = 3; // Default
 
-        // Margin bạn muốn cho mỗi button (ví dụ: 2dp mỗi bên trái/phải)
-        int buttonMarginHorizontalEachSide = dpToPx(2); // margin ngang mỗi bên của button
-        // Tổng margin ngang cho MỘT button
-        int totalMarginPerButton = buttonMarginHorizontalEachSide * 2;
-
-        // Tổng không gian bị chiếm bởi margin của tất cả các button trong một hàng
-        // (columnCount button sẽ có columnCount * totalMarginPerButton)
-        int totalHorizontalMarginsInRow = columnCount * totalMarginPerButton;
-
-        // Chiều rộng còn lại cho nội dung của tất cả các button (sau khi trừ hết margin của chúng)
-        int remainingWidthForButtonActualContent = availableWidthForGridContent - totalHorizontalMarginsInRow;
-
-        // Chiều rộng cho nội dung của mỗi button
-        int buttonContentWidth = remainingWidthForButtonActualContent / columnCount;
-
-        for (String amountText : quickAmounts) {
+        for (int i = 0; i < quickAmounts.length; i++) {
+            String amountText = quickAmounts[i];
             AppCompatButton button = new AppCompatButton(requireContext());
-            button.setText(amountText + "đ"); // Giữ nguyên "đ" để nhất quán với ảnh
+            button.setText(amountText + "đ");
             button.setTextSize(TypedValue.COMPLEX_UNIT_SP, 14);
             button.setAllCaps(false);
-            // Bỏ padding cố định ở đây, để button tự điều chỉnh theo text và width đã tính
+            // Bỏ setPadding ở đây nếu bạn muốn button tự điều chỉnh hoặc set padding phù hợp
             // button.setPadding(dpToPx(8), dpToPx(10), dpToPx(8), dpToPx(10));
 
+            // Quan trọng: Định nghĩa cách button chiếm không gian trong GridLayout
             GridLayout.LayoutParams params = new GridLayout.LayoutParams();
-            params.width = buttonContentWidth; // Set chiều rộng đã tính
             params.height = GridLayout.LayoutParams.WRAP_CONTENT;
-            params.setMargins(buttonMarginHorizontalEachSide, dpToPx(6), buttonMarginHorizontalEachSide, dpToPx(6)); // Điều chỉnh margin dọc nếu cần
+            // Chia đều chiều rộng cho các cột, với trọng số 1
+            params.columnSpec = GridLayout.spec(GridLayout.UNDEFINED, 1f); // Weight 1f
+            params.width = 0; // Đặt width là 0dp khi dùng columnSpec với weight
+
+            // Thêm margin cho các button
+            int marginHorizontal = dpToPx(4); // Giảm margin để có thêm không gian cho button
+            int marginVertical = dpToPx(6);
+            params.setMargins(marginHorizontal, marginVertical, marginHorizontal, marginVertical);
+
             button.setLayoutParams(params);
 
-            setQuickButtonState(button, false);
+            setQuickButtonState(button, false); // Style ban đầu
             button.setOnClickListener(v -> {
                 handleQuickAmountButtonClick((AppCompatButton) v, amountText);
             });

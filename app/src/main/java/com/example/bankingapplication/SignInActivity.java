@@ -175,17 +175,11 @@ public class SignInActivity extends AppCompatActivity {
     private void saveTokenToFirestore(String userId, String token) {
         if (userId == null || token == null) return;
 
-        // Cách đơn giản: lưu token trực tiếp vào trường 'fcmToken' của user
         Map<String, Object> userUpdates = new HashMap<>();
-        userUpdates.put("fcmToken", token);
-        // Nếu bạn muốn lưu chi tiết hơn (ví dụ: token và thời gian cập nhật):
-        // Map<String, Object> fcmTokenDetails = new HashMap<>();
-        // fcmTokenDetails.put("token", token);
-        // fcmTokenDetails.put("lastUpdated", Timestamp.now());
-        // userUpdates.put("fcmTokenDetails", fcmTokenDetails); // Lưu vào một map con
+        userUpdates.put("fcmToken", token); // Giả sử bạn có trường fcmToken trong User object (và Firestore)
 
-        // Sử dụng lớp Firestore của bạn (nếu có phương thức update tiện lợi)
-        // Hoặc dùng FirebaseFirestore.getInstance() trực tiếp
+        // Sử dụng lớp Firestore của bạn (đảm bảo có hàm updateUserFields hoặc tương tự)
+        // Hoặc dùng FirebaseFirestore.getInstance() trực tiếp nếu updateUserFields chỉ cập nhật các trường cụ thể
         com.google.firebase.firestore.FirebaseFirestore.getInstance().collection("users").document(userId)
                 .update(userUpdates) // Hoặc .set(userUpdates, SetOptions.merge()) để tạo trường nếu chưa có
                 .addOnSuccessListener(aVoid -> Log.d(TAG, "FCM Token successfully written/updated for user: " + userId))
