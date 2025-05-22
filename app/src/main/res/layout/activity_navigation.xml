@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -11,7 +12,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <!-- Toolbar cho nút Back -->
+        <!-- Toolbar -->
         <androidx.appcompat.widget.Toolbar
             android:id="@+id/toolbar_navigation"
             android:layout_width="match_parent"
@@ -20,15 +21,14 @@
             app:title="Chi nhánh giao dịch"
             app:titleTextColor="@color/white"
             app:navigationIcon="@drawable/ic_arrow_back" />
-        <!-- Tạo drawable ic_arrow_back (vector asset) -->
 
+        <!-- KHÔI PHỤC SUPPORTMAPFRAGMENT CHO GOOGLE MAPS -->
         <androidx.fragment.app.FragmentContainerView
             android:id="@+id/map"
             android:name="com.google.android.gms.maps.SupportMapFragment"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_below="@id/toolbar_navigation" />
-
 
         <ProgressBar
             android:id="@+id/progressBar"
@@ -38,7 +38,6 @@
             android:layout_centerInParent="true"
             android:visibility="gone" />
 
-        <!-- Nút để mở/đóng BottomSheet (có thể không cần nếu bạn chỉ muốn kéo từ dưới lên) -->
         <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/fab_show_list"
             android:layout_width="wrap_content"
@@ -46,14 +45,10 @@
             android:layout_alignParentStart="true"
             android:layout_alignParentBottom="true"
             android:layout_margin="16dp"
-
-
             android:contentDescription="Hiển thị danh sách"
             android:src="@drawable/ic_list"
             app:backgroundTint="@color/green_primary"
             app:tint="@android:color/white" />
-        <!-- Tạo drawable ic_list (vector asset) -->
-
     </RelativeLayout>
 
     <!-- BottomSheet Layout -->
@@ -67,7 +62,6 @@
         app:behavior_peekHeight="100dp"
         app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior">
 
-        <!-- "Tay nắm" để kéo BottomSheet -->
         <View
             android:id="@+id/bottom_sheet_handle"
             android:layout_width="40dp"
@@ -92,8 +86,6 @@
             android:id="@+id/recycler_view_bank_offices"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:maxHeight="400dp" /> <!-- Giới hạn chiều cao tối đa của RecyclerView -->
-
+            android:maxHeight="400dp" />
     </LinearLayout>
-
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

@@ -1,10 +1,11 @@
 package com.example.bankingapplication;
 
 import android.Manifest;
+import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.graphics.Color;
+// Bỏ import android.graphics.Color; // Nếu không dùng trực tiếp
 import android.location.Location;
-// Bỏ import android.net.Uri; nếu chỉ dùng Routes API và không mở Google Maps app nữa
+import android.net.Uri; // Cần cho Intent mở Google Maps
 import android.os.Bundle;
 import android.util.Log;
 import android.view.MenuItem;
@@ -23,81 +24,65 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.bankingapplication.Adapter.BankOfficeAdapter;
-// Các import cho Model của Routes API (đảm bảo bạn đã tạo các file này)
-import com.example.bankingapplication.Model.Routes.ComputeRoutesRequest;
-import com.example.bankingapplication.Model.Routes.ComputeRoutesResponse;
-import com.example.bankingapplication.Model.Routes.Location_Routes; // Đã đổi tên để tránh trùng
-import com.example.bankingapplication.Model.Routes.Route; // Route của Routes API
-import com.example.bankingapplication.Model.Routes.RoutesLatLng;
-import com.example.bankingapplication.Model.Routes.Waypoint;
-import com.example.bankingapplication.Model.Routes.Polyline; // Polyline của Routes API (nếu tên khác với gms.maps.model.Polyline)
-// import com.example.bankingapplication.Model.Routes.Leg; // Nếu bạn dùng Leg của Routes API
-// import com.example.bankingapplication.Model.Routes.Distance_Routes;
-// import com.example.bankingapplication.Model.Routes.Duration_Routes;
-
-import com.example.bankingapplication.Network.RoutesApiService; // Service mới
 import com.example.bankingapplication.Object.BankOffice;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
-import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.OnMapReadyCallback;
-import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.GoogleMap; // GoogleMap
+import com.google.android.gms.maps.OnMapReadyCallback; // OnMapReadyCallback
+import com.google.android.gms.maps.SupportMapFragment; // SupportMapFragment
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.LatLngBounds;
+// import com.google.android.gms.maps.model.LatLngBounds; // Giữ lại nếu bạn dùng
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.android.gms.maps.model.PolylineOptions;
-import com.google.android.gms.maps.model.RoundCap;
+// Bỏ import Polyline, PolylineOptions, RoundCap của Google nếu không vẽ đường fallback nữa
+// import com.google.android.gms.maps.model.Polyline;
+// import com.google.android.gms.maps.model.PolylineOptions;
+// import com.google.android.gms.maps.model.RoundCap;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
-import com.google.maps.android.PolyUtil;
+import com.google.firebase.firestore.QuerySnapshot;
+// Bỏ import PolyUtil của Google Maps Utils
+// import com.google.maps.android.PolyUtil;
+// Bỏ các import của Retrofit và Model classes của Directions/Routes API
 
-import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
+import java.util.Locale; // Cần cho String.format
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
-import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
-
-
 public class NavigationActivity extends AppCompatActivity implements OnMapReadyCallback, BankOfficeAdapter.OnOfficeClickListener {
 
-    private static final String TAG = "NavigationActivity";
+    private static final String TAG = "NavigationActivityGoogle"; // Đổi TAG
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 1;
     private static final float DEFAULT_ZOOM = 14f;
 
-    private GoogleMap mMap;
+    private GoogleMap mMap; // Sử dụng GoogleMap
     private FusedLocationProviderClient fusedLocationClient;
     private FirebaseFirestore db;
     private List<BankOffice> bankOfficesList = new ArrayList<>();
+    private HashMap<String, Marker> bankOfficeMarkers = new HashMap<>();
     private Location currentUserLocation;
     private ProgressBar progressBar;
-    private com.google.android.gms.maps.model.Polyline currentRoutePolylineView; // Để vẽ lên bản đồ
+    // private Polyline currentRoutePolylineView; // Bỏ nếu không vẽ đường nữa
 
     private BottomSheetBehavior<LinearLayout> bottomSheetBehavior;
-    private LinearLayout bottomSheetLayout;
     private RecyclerView recyclerViewBankOffices;
     private BankOfficeAdapter bankOfficeAdapter;
     private FloatingActionButton fabShowList;
     private Toolbar toolbar;
 
-    private Retrofit retrofitRoutes;
-    private RoutesApiService routesApiService;
-    private String routesApiKey;
-
+    // Bỏ các biến Retrofit và API key của HERE/Mapbox
+    // private Retrofit retrofitRoutes;
+    // private RoutesApiService routesApiService;
+    // private String routesApiKey;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -117,20 +102,16 @@ public class NavigationActivity extends AppCompatActivity implements OnMapReadyC
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
         db = FirebaseFirestore.getInstance();
 
-        routesApiKey = BuildConfig.DIRECTIONS_API_KEY; // Vẫn dùng key đã cấu hình
-        if (routesApiKey == null || routesApiKey.isEmpty()) {
-            Log.e(TAG, "ROUTES_API_KEY (DIRECTIONS_API_KEY) is not set or empty in BuildConfig.");
-            Toast.makeText(this, "Lỗi cấu hình API chỉ đường. Chức năng có thể không hoạt động.", Toast.LENGTH_LONG).show();
-        }
-        setupRoutesApiService();
+        // Bỏ setupRoutesApiService();
 
         setupBottomSheet();
         setupRecyclerView();
 
+        // Khởi tạo SupportMapFragment
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
-                .findFragmentById(R.id.map);
+                .findFragmentById(R.id.map); // ID của FragmentContainerView trong XML
         if (mapFragment != null) {
-            mapFragment.getMapAsync(this);
+            mapFragment.getMapAsync(this); // this (Activity) implement OnMapReadyCallback
         } else {
             Toast.makeText(this, "Lỗi - Không tìm thấy Map Fragment!", Toast.LENGTH_SHORT).show();
         }
@@ -144,17 +125,6 @@ public class NavigationActivity extends AppCompatActivity implements OnMapReadyC
         });
     }
 
-    private void setupRoutesApiService() {
-        if (retrofitRoutes == null) { // Chỉ khởi tạo nếu chưa có
-            retrofitRoutes = new Retrofit.Builder()
-                    .baseUrl("https://routes.googleapis.com/")
-                    .addConverterFactory(GsonConverterFactory.create())
-                    .build();
-        }
-        routesApiService = retrofitRoutes.create(RoutesApiService.class);
-    }
-
-
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == android.R.id.home) {
@@ -165,47 +135,84 @@ public class NavigationActivity extends AppCompatActivity implements OnMapReadyC
     }
 
     private void setupBottomSheet() {
-        bottomSheetLayout = findViewById(R.id.bottom_sheet_layout);
+        // ... (Giữ nguyên logic setupBottomSheet)
+        LinearLayout bottomSheetLayout = findViewById(R.id.bottom_sheet_layout);
         bottomSheetBehavior = BottomSheetBehavior.from(bottomSheetLayout);
         try {
             bottomSheetBehavior.setPeekHeight(getResources().getDimensionPixelSize(R.dimen.bottom_sheet_peek_height));
         } catch (Exception e) {
-            int fallbackPeekHeight = (int) (100 * getResources().getDisplayMetrics().density);
-            bottomSheetBehavior.setPeekHeight(fallbackPeekHeight);
-            Log.w(TAG, "R.dimen.bottom_sheet_peek_height not found, using fallback: " + fallbackPeekHeight + "px");
+            bottomSheetBehavior.setPeekHeight(100 * (int) getResources().getDisplayMetrics().density);
+            Log.w(TAG, "R.dimen.bottom_sheet_peek_height not found, using fallback 100dp");
         }
         bottomSheetBehavior.setHideable(true);
         bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
-
         bottomSheetBehavior.addBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
             @Override
             public void onStateChanged(@NonNull View bottomSheet, int newState) {
+                // Log trạng thái để debug
+                // String stateString = "";
+                // switch (newState) {
+                //     case BottomSheetBehavior.STATE_COLLAPSED: stateString = "COLLAPSED"; break;
+                //     case BottomSheetBehavior.STATE_EXPANDED: stateString = "EXPANDED"; break;
+                //     case BottomSheetBehavior.STATE_DRAGGING: stateString = "DRAGGING"; break;
+                //     case BottomSheetBehavior.STATE_SETTLING: stateString = "SETTLING"; break;
+                //     case BottomSheetBehavior.STATE_HIDDEN: stateString = "HIDDEN"; break;
+                //     case BottomSheetBehavior.STATE_HALF_EXPANDED: stateString = "HALF_EXPANDED"; break;
+                // }
+                // Log.d(TAG, "BottomSheet onStateChanged: " + stateString);
+
+
+                if (fabShowList == null) return; // Kiểm tra null cho FAB
+
                 if (newState == BottomSheetBehavior.STATE_EXPANDED) {
-                    fabShowList.setImageResource(R.drawable.ic_keyboard_arrow_down);
+                    fabShowList.setImageResource(R.drawable.ic_keyboard_arrow_down); // Đảm bảo bạn có drawable này
                 } else if (newState == BottomSheetBehavior.STATE_COLLAPSED || newState == BottomSheetBehavior.STATE_HIDDEN) {
-                    fabShowList.setImageResource(R.drawable.ic_list);
+                    fabShowList.setImageResource(R.drawable.ic_list); // Đảm bảo bạn có drawable này
                 }
+                // Bạn có thể xử lý các trạng thái khác nếu cần (DRAGGING, SETTLING, HALF_EXPANDED)
             }
+
             @Override
-            public void onSlide(@NonNull View bottomSheet, float slideOffset) {}
+            public void onSlide(@NonNull View bottomSheet, float slideOffset) {
+                // slideOffset từ -1.0 (ẩn) đến 0.0 (peekHeight/collapsed) đến 1.0 (mở rộng hoàn toàn)
+                // Bạn có thể để trống nếu không cần xử lý gì đặc biệt khi đang trượt.
+                // Ví dụ:
+                // if (fabShowList != null) {
+                //     // Làm mờ FAB khi bottom sheet không ở trạng thái collapsed hoặc expanded hoàn toàn
+                //     if (slideOffset > 0 && slideOffset < 1) { // Đang giữa collapsed và expanded
+                //         fabShowList.setAlpha(1.0f - slideOffset);
+                //     } else if (slideOffset < 0) { // Đang giữa collapsed và hidden
+                //         fabShowList.setAlpha(1.0f + slideOffset);
+                //     } else { // Ở trạng thái collapsed, expanded, hoặc hidden
+                //         fabShowList.setAlpha(1.0f);
+                //     }
+                // }
+            }
         });
     }
 
     private void setupRecyclerView() {
+        // ... (Giữ nguyên logic setupRecyclerView)
         recyclerViewBankOffices = findViewById(R.id.recycler_view_bank_offices);
         recyclerViewBankOffices.setLayoutManager(new LinearLayoutManager(this));
         bankOfficeAdapter = new BankOfficeAdapter(this, new ArrayList<>(), currentUserLocation, this);
         recyclerViewBankOffices.setAdapter(bankOfficeAdapter);
     }
 
+    // Callback khi GoogleMap sẵn sàng
     @Override
     public void onMapReady(@NonNull GoogleMap googleMap) {
         mMap = googleMap;
-        mMap.getUiSettings().setZoomControlsEnabled(true);
-        mMap.getUiSettings().setMyLocationButtonEnabled(true);
+        Log.i(TAG, "Google Map is ready.");
+
+        // Bạn có thể bật/tắt nút zoom mặc định ở đây
+        // mMap.getUiSettings().setZoomControlsEnabled(true); // Hoặc false nếu bạn tự tạo nút zoom
+
+        mMap.getUiSettings().setMyLocationButtonEnabled(true); // Nút vị trí của tôi (mặc định của Google)
 
         mMap.setInfoWindowAdapter(new GoogleMap.InfoWindowAdapter() {
-            @Override public View getInfoWindow(@NonNull Marker marker) { return null; }
+            @Override
+            public View getInfoWindow(@NonNull Marker marker) { return null; } // Sử dụng frame mặc định
             @Override
             public View getInfoContents(@NonNull Marker marker) {
                 View infoWindow = getLayoutInflater().inflate(R.layout.custom_info_window, null);
@@ -221,7 +228,7 @@ public class NavigationActivity extends AppCompatActivity implements OnMapReadyC
                     phoneView.setText("SĐT: " + office.getPhone());
                     hoursView.setText("Giờ: " + office.getOpenHoursFormatted() + " - " + office.getCloseHoursFormatted());
                 } else {
-                    title.setText(marker.getTitle());
+                    title.setText(marker.getTitle()); // Fallback nếu không có BankOffice object
                     addressView.setText(marker.getSnippet());
                     phoneView.setVisibility(View.GONE);
                     hoursView.setVisibility(View.GONE);
@@ -230,20 +237,20 @@ public class NavigationActivity extends AppCompatActivity implements OnMapReadyC
             }
         });
 
+        // Khi người dùng nhấn vào InfoWindow (cái bảng thông tin của marker)
+        // Trong onMapReady()
         mMap.setOnInfoWindowClickListener(marker -> {
             BankOffice office = (BankOffice) marker.getTag();
-            if (office != null && office.getLatLng() != null && currentUserLocation != null) {
-                fetchAndDrawRouteUsingRoutesAPI(
-                        new LatLng(currentUserLocation.getLatitude(), currentUserLocation.getLongitude()),
-                        office.getLatLng()
-                );
+            if (office != null && office.getLatLng() != null) {
+                // Truyền tên văn phòng cho trường hợp fallback
+                openGoogleMapsForDirections(office.getLatLng(), office.getName());
             } else {
-                Toast.makeText(this, "Không thể lấy vị trí hiện tại hoặc vị trí văn phòng.", Toast.LENGTH_SHORT).show();
+                Toast.makeText(NavigationActivity.this, "Không có đủ thông tin để chỉ đường.", Toast.LENGTH_SHORT).show();
             }
         });
 
         mMap.setOnMapClickListener(latLng -> {
-            if (bottomSheetBehavior.getState() == BottomSheetBehavior.STATE_EXPANDED) {
+            if (bottomSheetBehavior != null && bottomSheetBehavior.getState() == BottomSheetBehavior.STATE_EXPANDED) {
                 bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
             }
         });
@@ -251,175 +258,102 @@ public class NavigationActivity extends AppCompatActivity implements OnMapReadyC
         checkLocationPermissionAndFetchData();
     }
 
+    // Khi nhấn vào một item trong RecyclerView
     @Override
     public void onOfficeClick(BankOffice office) {
-        if (office != null && office.getLatLng() != null && currentUserLocation != null) {
-            fetchAndDrawRouteUsingRoutesAPI(
-                    new LatLng(currentUserLocation.getLatitude(), currentUserLocation.getLongitude()),
-                    office.getLatLng()
-            );
-            if (mMap != null) { // Kiểm tra mMap trước khi dùng
+        if (mMap == null) {
+            Toast.makeText(this, "Bản đồ chưa sẵn sàng.", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        if (office != null && office.getLatLng() != null && office.getUID() != null) {
+            Marker markerToShow = bankOfficeMarkers.get(office.getUID());
+
+            if (markerToShow != null) {
+                // Di chuyển camera đến marker và hiển thị InfoWindow
+                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(markerToShow.getPosition(), DEFAULT_ZOOM + 2), 500, null);
+                markerToShow.showInfoWindow();
+            } else {
+                // Fallback: nếu không tìm thấy marker, chỉ di chuyển camera
                 mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(office.getLatLng(), DEFAULT_ZOOM + 1));
+                Log.w(TAG, "Marker không được tìm thấy trong HashMap cho văn phòng: " + office.getName());
+                Toast.makeText(this, "Đã chọn: " + office.getName() + ". Không tìm thấy marker liên kết.", Toast.LENGTH_SHORT).show();
             }
-            if (bottomSheetBehavior.getState() == BottomSheetBehavior.STATE_EXPANDED) {
+
+            if (bottomSheetBehavior != null && bottomSheetBehavior.getState() == BottomSheetBehavior.STATE_EXPANDED) {
                 bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
             }
         } else {
-            Toast.makeText(this, "Không có thông tin vị trí để vẽ đường đi.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Không có thông tin vị trí hoặc ID cho văn phòng này.", Toast.LENGTH_SHORT).show();
         }
     }
 
-    private void fetchAndDrawRouteUsingRoutesAPI(LatLng originGms, LatLng destinationGms) {
-        if (routesApiKey == null || routesApiKey.isEmpty() || routesApiKey.equals("YOUR_PLACEHOLDER_IF_KEY_MISSING")) {
-            Toast.makeText(this, "Chức năng chỉ đường chưa được cấu hình (API Key).", Toast.LENGTH_LONG).show();
-            Log.e(TAG, "API Key for Routes API is missing or invalid.");
+    // Hàm mở ứng dụng Google Maps để chỉ đường
+    private void openGoogleMapsForDirections(LatLng destination, String destinationName) {
+        if (currentUserLocation == null) {
+            // Nếu không có vị trí hiện tại, chỉ hiển thị điểm đến trên Google Maps
+            Log.w(TAG, "Current user location is null. Showing destination only.");
+            String uriStringViewLocation = String.format(Locale.US, "geo:0,0?q=%f,%f(%s)",
+                    destination.latitude,
+                    destination.longitude,
+                    Uri.encode(destinationName != null ? destinationName : "Điểm đến")
+            );
+            Uri gmmIntentUri = Uri.parse(uriStringViewLocation);
+            Intent mapIntent = new Intent(Intent.ACTION_VIEW, gmmIntentUri);
+            mapIntent.setPackage("com.google.android.apps.maps");
+            if (mapIntent.resolveActivity(getPackageManager()) != null) {
+                startActivity(mapIntent);
+            } else {
+                Toast.makeText(this, "Không tìm thấy ứng dụng Google Maps.", Toast.LENGTH_SHORT).show();
+            }
             return;
         }
-        if (mMap == null || routesApiService == null) {
-            Toast.makeText(this, "Dịch vụ bản đồ hoặc chỉ đường chưa sẵn sàng.", Toast.LENGTH_SHORT).show();
-            return;
-        }
 
-        if (currentRoutePolylineView != null) {
-            currentRoutePolylineView.remove();
-        }
+        // Có vị trí hiện tại, tạo intent để hiển thị màn hình xem trước lộ trình
+        String originLatLng = currentUserLocation.getLatitude() + "," + currentUserLocation.getLongitude();
+        String destinationLatLng = destination.latitude + "," + destination.longitude;
 
-        progressBar.setVisibility(View.VISIBLE);
+        // Tạo Uri cho Google Maps Intent để hiển thị màn hình xem trước lộ trình
+        // Sử dụng daddr (destination address) và saddr (source address)
+        // Thêm dirflg=d để ưu tiên chế độ lái xe (d: driving, w: walking, b: bicycling, r: transit)
+        Uri gmmIntentUri = Uri.parse("https://maps.google.com/maps?saddr=" + originLatLng + "&daddr=" + destinationLatLng + "&dirflg=d");
 
-        Waypoint originWaypoint = new Waypoint(new Location_Routes(new RoutesLatLng(originGms.latitude, originGms.longitude)));
-        Waypoint destinationWaypoint = new Waypoint(new Location_Routes(new RoutesLatLng(destinationGms.latitude, destinationGms.longitude)));
-        ComputeRoutesRequest requestBody = new ComputeRoutesRequest(originWaypoint, destinationWaypoint, "DRIVE");
-        requestBody.setLanguageCode("vi"); // Yêu cầu thông tin bằng tiếng Việt nếu có
+        Intent mapIntent = new Intent(Intent.ACTION_VIEW, gmmIntentUri);
+        mapIntent.setPackage("com.google.android.apps.maps"); // Chỉ định mở bằng Google Maps
 
-        String fieldMask = "routes.polyline.encodedPolyline,routes.duration,routes.distanceMeters";
+        Log.d(TAG, "Opening Google Maps with directions intent: " + gmmIntentUri.toString());
 
-        Log.d(TAG, "Requesting Routes API: Origin=" + originGms + ", Dest=" + destinationGms);
-
-        routesApiService.computeRoutes(routesApiKey, fieldMask, requestBody)
-                .enqueue(new Callback<ComputeRoutesResponse>() {
-                    @Override
-                    public void onResponse(@NonNull Call<ComputeRoutesResponse> call, @NonNull Response<ComputeRoutesResponse> response) {
-                        progressBar.setVisibility(View.GONE);
-                        if (response.isSuccessful() && response.body() != null) {
-                            ComputeRoutesResponse routesResponse = response.body();
-                            if (routesResponse.getRoutes() != null && !routesResponse.getRoutes().isEmpty()) {
-                                Route route = routesResponse.getRoutes().get(0);
-
-                                if (route.getPolyline() != null && route.getPolyline().getEncodedPolyline() != null) {
-                                    List<LatLng> decodedPath = PolyUtil.decode(route.getPolyline().getEncodedPolyline());
-                                    if (!decodedPath.isEmpty()) {
-                                        currentRoutePolylineView = mMap.addPolyline(new PolylineOptions()
-                                                .addAll(decodedPath)
-                                                .width(12f)
-                                                .color(ContextCompat.getColor(NavigationActivity.this, R.color.colorPrimary))
-                                                .geodesic(true)
-                                                .startCap(new RoundCap())
-                                                .endCap(new RoundCap()));
-
-                                        String durationStr = route.getDuration() != null ? formatDurationFromSecondsString(route.getDuration()) : "N/A";
-                                        String distanceStr = route.getDistanceMeters() > 0 ? formatDistanceMeters(route.getDistanceMeters()) : "N/A";
-                                        Toast.makeText(NavigationActivity.this, "Khoảng cách: " + distanceStr + ", Thời gian: " + durationStr, Toast.LENGTH_LONG).show();
-                                        Log.d(TAG, "Route drawn. Distance: " + distanceStr + ", Duration: " + durationStr);
-
-                                        LatLngBounds.Builder builder = new LatLngBounds.Builder();
-                                        for (LatLng point : decodedPath) {
-                                            builder.include(point);
-                                        }
-                                        builder.include(originGms);
-                                        builder.include(destinationGms);
-                                        try {
-                                            LatLngBounds bounds = builder.build();
-                                            int padding = (int) (getResources().getDisplayMetrics().widthPixels * 0.15); // 15% màn hình
-                                            CameraUpdate cu = CameraUpdateFactory.newLatLngBounds(bounds, padding);
-                                            mMap.animateCamera(cu);
-                                        } catch (IllegalStateException e) {
-                                            Log.e(TAG, "Error animating camera to bounds: " + e.getMessage());
-                                            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(destinationGms, DEFAULT_ZOOM));
-                                        }
-                                    } else {
-                                        Log.w(TAG, "Routes API: Decoded path is empty.");
-                                        Toast.makeText(NavigationActivity.this, "Không thể giải mã đường đi.", Toast.LENGTH_SHORT).show();
-                                    }
-                                } else {
-                                    Log.w(TAG, "Routes API: Polyline or encodedPolyline is null.");
-                                    Toast.makeText(NavigationActivity.this, "Không nhận được dữ liệu polyline.", Toast.LENGTH_SHORT).show();
-                                }
-                            } else if (routesResponse.getError() != null) {
-                                Log.e(TAG, "Routes API Error: " + routesResponse.getError().getStatus() + " - " + routesResponse.getError().getMessage());
-                                Toast.makeText(NavigationActivity.this, "Lỗi chỉ đường: " + routesResponse.getError().getMessage(), Toast.LENGTH_LONG).show();
-                            } else {
-                                Log.w(TAG, "Routes API: No routes found or error not specified in response body.");
-                                Toast.makeText(NavigationActivity.this, "Không tìm thấy lộ trình.", Toast.LENGTH_SHORT).show();
-                            }
-                        } else {
-                            String errorBodyStr = "";
-                            try {
-                                if (response.errorBody() != null) errorBodyStr = response.errorBody().string();
-                            } catch (IOException e) { Log.e(TAG, "Error reading error body", e); }
-                            Log.e(TAG, "Routes API request failed. Code: " + response.code() + ", Msg: " + response.message() + ", ErrorBody: " + errorBodyStr);
-                            Toast.makeText(NavigationActivity.this, "Không thể tải chỉ đường (Mã: " + response.code() + ")", Toast.LENGTH_LONG).show();
-                        }
-                    }
-
-                    @Override
-                    public void onFailure(@NonNull Call<ComputeRoutesResponse> call, @NonNull Throwable t) {
-                        progressBar.setVisibility(View.GONE);
-                        Log.e(TAG, "Routes API request failure: ", t);
-                        Toast.makeText(NavigationActivity.this, "Lỗi kết nối khi tải chỉ đường.", Toast.LENGTH_SHORT).show();
-                    }
-                });
-    }
-
-    private String formatDurationFromSecondsString(String durationSecondsString) {
-        if (durationSecondsString == null || !durationSecondsString.endsWith("s")) {
-            return "N/A";
-        }
-        try {
-            int totalSeconds = Integer.parseInt(durationSecondsString.replace("s", ""));
-            if (totalSeconds < 0) return "N/A";
-            int hours = totalSeconds / 3600;
-            int minutes = (totalSeconds % 3600) / 60;
-            StringBuilder sb = new StringBuilder();
-            if (hours > 0) sb.append(hours).append(" giờ ");
-            if (minutes > 0 || hours == 0) sb.append(minutes).append(" phút"); // Hiển thị phút nếu có, hoặc nếu giờ = 0
-            return sb.length() > 0 ? sb.toString().trim() : "0 phút";
-        } catch (NumberFormatException e) {
-            Log.e(TAG, "Error parsing duration string: " + durationSecondsString, e);
-            return "N/A";
+        if (mapIntent.resolveActivity(getPackageManager()) != null) {
+            startActivity(mapIntent);
+        } else {
+            Toast.makeText(this, "Không tìm thấy ứng dụng Google Maps.", Toast.LENGTH_SHORT).show();
+            // Fallback: Mở bằng trình duyệt web nếu không có ứng dụng Google Maps
+            Intent webIntent = new Intent(Intent.ACTION_VIEW,
+                    Uri.parse("https://www.google.com/maps/dir/?api=1&origin=" + originLatLng + "&destination=" + destinationLatLng + "&travelmode=driving"));
+            if (webIntent.resolveActivity(getPackageManager()) != null) {
+                Log.d(TAG, "Falling back to web browser for directions.");
+                startActivity(webIntent);
+            } else {
+                Toast.makeText(this, "Không thể mở bản đồ chỉ đường.", Toast.LENGTH_LONG).show();
+            }
         }
     }
 
-    private String formatDistanceMeters(int distanceMeters) {
-        if (distanceMeters < 0) return "N/A";
-        if (distanceMeters == 0) return "0 km";
-        double distanceKm = distanceMeters / 1000.0;
-        return String.format(Locale.getDefault(), "%.1f km", distanceKm);
-    }
 
-
-    // --- Các phương thức còn lại (checkLocationPermissionAndFetchData, etc.) ---
-    // Giữ nguyên các phương thức này như bạn đã cung cấp.
-    // Đảm bảo tên collection trong fetchBankOffices là "bankofficers"
-    // và tên trường "name" được lấy đúng từ document.
-
+    // --- Các hàm xử lý vị trí và Firebase Firestore ---
     private void checkLocationPermissionAndFetchData() {
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
-                == PackageManager.PERMISSION_GRANTED) {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
                 return;
             }
-            if (mMap != null) mMap.setMyLocationEnabled(true);
+            if (mMap != null) mMap.setMyLocationEnabled(true); // Bật layer vị trí của tôi trên Google Map
             getCurrentLocationAndFetchBanks();
         } else {
-            ActivityCompat.requestPermissions(this,
-                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
-                    LOCATION_PERMISSION_REQUEST_CODE);
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, LOCATION_PERMISSION_REQUEST_CODE);
         }
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
-                                           @NonNull int[] grantResults) {
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (requestCode == LOCATION_PERMISSION_REQUEST_CODE) {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
@@ -430,7 +364,7 @@ public class NavigationActivity extends AppCompatActivity implements OnMapReadyC
                 getCurrentLocationAndFetchBanks();
             } else {
                 Toast.makeText(this, "Quyền vị trí bị từ chối.", Toast.LENGTH_LONG).show();
-                fetchBankOffices(null);
+                fetchBankOffices(null); // Vẫn tải danh sách ngân hàng
             }
         }
     }
@@ -438,94 +372,89 @@ public class NavigationActivity extends AppCompatActivity implements OnMapReadyC
     private void getCurrentLocationAndFetchBanks() {
         progressBar.setVisibility(View.VISIBLE);
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            progressBar.setVisibility(View.GONE);
-            return;
+            progressBar.setVisibility(View.GONE); return;
         }
         fusedLocationClient.getLastLocation()
                 .addOnSuccessListener(this, location -> {
                     progressBar.setVisibility(View.GONE);
                     if (location != null) {
-                        Log.d(TAG, "Current location obtained: " + location.getLatitude() + ", " + location.getLongitude());
                         currentUserLocation = location;
+                        Log.d(TAG, "Current location: " + location.getLatitude() + "," + location.getLongitude());
+                        if (mMap != null) {
+                            LatLng userLatLng = new LatLng(location.getLatitude(), location.getLongitude());
+                            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(userLatLng, DEFAULT_ZOOM));
+                        }
                         if (bankOfficeAdapter != null) {
                             bankOfficeAdapter.updateUserLocationAndSort(currentUserLocation);
                         }
-                        LatLng userLatLng = new LatLng(location.getLatitude(), location.getLongitude());
-                        if (mMap != null) {
-                            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(userLatLng, DEFAULT_ZOOM));
-                        }
-                        fetchBankOffices(userLatLng);
-                    } else {
-                        Toast.makeText(this, "Không thể lấy vị trí hiện tại. Hãy đảm bảo vị trí đã được bật.", Toast.LENGTH_LONG).show();
-                        fetchBankOffices(null);
-                    }
+                        fetchBankOffices(new LatLng(location.getLatitude(), location.getLongitude()));
+                    } else { /* ... */ }
                 })
-                .addOnFailureListener(e -> {
-                    progressBar.setVisibility(View.GONE);
-                    Toast.makeText(this, "Lỗi khi lấy vị trí: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                    fetchBankOffices(null);
-                });
+                .addOnFailureListener(e -> { /* ... */ });
     }
 
-    private void fetchBankOffices(final LatLng userLatLng) {
-        progressBar.setVisibility(View.VISIBLE);
-        db.collection("bankofficers")
+    private void fetchBankOffices(final LatLng userGoogleLatLng) {
+        if (progressBar != null) progressBar.setVisibility(View.VISIBLE);
+        db.collection("bankofficers") // Đảm bảo tên collection đúng
                 .get()
                 .addOnCompleteListener(task -> {
-                    progressBar.setVisibility(View.GONE);
+                    if (progressBar != null) progressBar.setVisibility(View.GONE);
                     if (task.isSuccessful()) {
-                        List<BankOffice> fetchedOffices = new ArrayList<>();
-                        for (QueryDocumentSnapshot document : task.getResult()) {
-                            String officeName = document.getString("name"); // Lấy tên từ trường 'name' của document
-                            String address = document.getString("address");
-                            String phone = document.getString("phone");
-                            Timestamp openHoursTimestamp = document.getTimestamp("openHours");
-                            Timestamp closeHoursTimestamp = document.getTimestamp("closeHours");
+                        bankOfficesList.clear();
+                        bankOfficeMarkers.clear(); // Xóa markers cũ trong HashMap
+                        if (mMap != null) {
+                            mMap.clear(); // Xóa tất cả markers, polylines, etc. khỏi bản đồ
+                        }
 
-                            Map<String, Object> locationMap = (Map<String, Object>) document.get("location");
-                            if (locationMap != null) {
-                                String latStr = (String) locationMap.get("latitude");
-                                String lonStr = (String) locationMap.get("longitude");
+                        QuerySnapshot querySnapshot = task.getResult();
+                        if (querySnapshot != null) {
+                            for (QueryDocumentSnapshot document : querySnapshot) {
+                                String officeName = document.getString("name");
+                                String address = document.getString("address");
+                                String phone = document.getString("phone");
+                                Timestamp openHoursTimestamp = document.getTimestamp("openHours");
+                                Timestamp closeHoursTimestamp = document.getTimestamp("closeHours");
+                                Map<String, Object> locationMap = (Map<String, Object>) document.get("location");
 
-                                if (latStr != null && lonStr != null) {
-                                    double lat = parseDmsToDecimal(latStr);
-                                    double lon = parseDmsToDecimal(lonStr);
+                                if (locationMap != null) {
+                                    String latStr = (String) locationMap.get("latitude");
+                                    String lonStr = (String) locationMap.get("longitude");
+                                    if (latStr != null && lonStr != null) {
+                                        double lat = parseDmsToDecimal(latStr);
+                                        double lon = parseDmsToDecimal(lonStr);
+                                        if (lat != 0.0 || lon != 0.0) { // Cho phép (0,0) nếu là tọa độ hợp lệ
+                                            LatLng officeLatLng = new LatLng(lat, lon);
+                                            String officeUID = document.getId(); // Lấy UID
+                                            BankOffice office = new BankOffice(officeUID, officeName, address, officeLatLng, phone, openHoursTimestamp, closeHoursTimestamp);
+                                            bankOfficesList.add(office);
 
-                                    if (lat != 0.0 || lon != 0.0) { // Allow (0,0) if it's a valid coordinate for some reason
-                                        LatLng officeLatLng = new LatLng(lat, lon);
-                                        BankOffice office = new BankOffice(document.getId(), officeName, address, officeLatLng, phone, openHoursTimestamp, closeHoursTimestamp);
-                                        fetchedOffices.add(office);
-
-                                        if (mMap != null) {
-                                            Marker marker = mMap.addMarker(new MarkerOptions()
-                                                    .position(officeLatLng)
-                                                    .title(officeName)
-                                                    .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE)));
-                                            if (marker != null) marker.setTag(office);
+                                            if (mMap != null) {
+                                                MarkerOptions markerOptions = new MarkerOptions()
+                                                        .position(officeLatLng)
+                                                        .title(officeName) // Title sẽ hiển thị mặc định khi chạm marker
+                                                        .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE));
+                                                Marker marker = mMap.addMarker(markerOptions);
+                                                if (marker != null) {
+                                                    marker.setTag(office); // Gắn đối tượng BankOffice vào marker
+                                                    bankOfficeMarkers.put(officeUID, marker); // Lưu marker vào HashMap
+                                                }
+                                            }
                                         }
-                                    } else {
-                                        Log.w(TAG, "Parsed lat/lon is (0,0) for " + officeName + ". Original DMS: " + latStr + ", " + lonStr);
                                     }
-                                } else {
-                                    Log.w(TAG, "Latitude or Longitude string is null in locationMap for document: " + document.getId());
                                 }
-                            } else {
-                                Log.w(TAG, "locationMap is null for document: " + document.getId());
                             }
                         }
-                        this.bankOfficesList.clear();
-                        this.bankOfficesList.addAll(fetchedOffices);
 
                         if (bankOfficeAdapter != null) {
-                            bankOfficeAdapter.updateBankOfficeList(new ArrayList<>(this.bankOfficesList));
-                            if (this.currentUserLocation != null) {
-                                bankOfficeAdapter.updateUserLocationAndSort(this.currentUserLocation);
+                            bankOfficeAdapter.updateBankOfficeList(new ArrayList<>(bankOfficesList));
+                            if (currentUserLocation != null) {
+                                bankOfficeAdapter.updateUserLocationAndSort(currentUserLocation);
                             }
                         }
 
-                        if (userLatLng != null && !this.bankOfficesList.isEmpty()) {
-                            findAndHighlightNearestBank(userLatLng);
-                        } else if (this.bankOfficesList.isEmpty()) {
+                        if (userGoogleLatLng != null && !bankOfficesList.isEmpty()) {
+                            findAndHighlightNearestBank(userGoogleLatLng); // Gọi lại nếu bạn muốn chức năng này
+                        } else if (bankOfficesList.isEmpty()) {
                             Toast.makeText(NavigationActivity.this, "Không tìm thấy văn phòng nào.", Toast.LENGTH_SHORT).show();
                         }
                     } else {
@@ -536,9 +465,9 @@ public class NavigationActivity extends AppCompatActivity implements OnMapReadyC
     }
 
     private double parseDmsToDecimal(String dmsStringWithDirection) {
+        // ... (code parseDmsToDecimal như cũ)
         if (dmsStringWithDirection == null || dmsStringWithDirection.isEmpty()) { Log.e(TAG, "DMS string is null or empty."); return 0.0; }
-        char direction = ' ';
-        String dmsString = dmsStringWithDirection.toUpperCase().trim();
+        char direction = ' '; String dmsString = dmsStringWithDirection.toUpperCase().trim();
         if (dmsString.endsWith("N") || dmsString.endsWith("S") || dmsString.endsWith("E") || dmsString.endsWith("W")) {
             direction = dmsString.charAt(dmsString.length() - 1);
             dmsString = dmsString.substring(0, dmsString.length() - 1);
@@ -554,32 +483,56 @@ public class NavigationActivity extends AppCompatActivity implements OnMapReadyC
                 double decimal = degrees + (minutes / 60.0) + (seconds / 3600.0);
                 if (direction == 'S' || direction == 'W') { decimal *= -1; }
                 return decimal;
-            } catch (NumberFormatException e) { Log.e(TAG, "Error parsing DMS components from: " + dmsStringWithDirection, e); return 0.0; }
+            } catch (NumberFormatException e) { Log.e(TAG, "Error parsing DMS: " + dmsStringWithDirection, e); return 0.0; }
         } else {
-            Log.e(TAG, "DMS string does not match expected pattern: " + dmsStringWithDirection + " (cleaned: " + dmsString + ")");
+            Log.e(TAG, "DMS pattern not matched: " + dmsStringWithDirection);
             try { return Double.parseDouble(dmsStringWithDirection.replaceAll("[^0-9.-]", ""));}
-            catch (NumberFormatException e) { Log.e(TAG, "Fallback parsing failed for: " + dmsStringWithDirection, e); return 0.0; }
+            catch (NumberFormatException e) { Log.e(TAG, "Fallback DMS parsing failed: " + dmsStringWithDirection, e); return 0.0; }
         }
     }
 
+    // Hàm findAndHighlightNearestBank có thể giữ lại nếu bạn muốn chức năng này
+    // Hàm findAndHighlightNearestBank có thể giữ lại nếu bạn muốn chức năng này
     private void findAndHighlightNearestBank(LatLng userLatLng) {
-        if (bankOfficesList.isEmpty()) return;
+        if (bankOfficesList.isEmpty() || mMap == null) {
+            return;
+        }
+
         BankOffice nearestOffice = null;
         float minDistance = Float.MAX_VALUE;
+
         for (BankOffice office : bankOfficesList) {
             if (office.getLatLng() == null) continue;
             float[] results = new float[1];
-            Location.distanceBetween(userLatLng.latitude, userLatLng.longitude, office.getLatLng().latitude, office.getLatLng().longitude, results);
-            if (results[0] < minDistance) {
-                minDistance = results[0];
+            Location.distanceBetween(userLatLng.latitude, userLatLng.longitude,
+                    office.getLatLng().latitude, office.getLatLng().longitude, results);
+            float distance = results[0];
+
+            if (distance < minDistance) {
+                minDistance = distance;
                 nearestOffice = office;
             }
         }
-        if (nearestOffice != null && mMap != null) {
-            Toast.makeText(this, "Văn phòng gần nhất: " + (nearestOffice.getName() != null ? nearestOffice.getName() : "N/A"), Toast.LENGTH_LONG).show();
-            if (nearestOffice.getLatLng() != null) {
-                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(nearestOffice.getLatLng(), DEFAULT_ZOOM + 1));
+
+        if (nearestOffice != null && nearestOffice.getUID() != null) {
+            Marker nearestMarker = bankOfficeMarkers.get(nearestOffice.getUID());
+            if (nearestMarker != null) {
+                // Thay đổi icon của marker gần nhất (ví dụ: sang màu xanh lá)
+                nearestMarker.setIcon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
+                nearestMarker.showInfoWindow(); // Hiển thị InfoWindow của marker gần nhất
+                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(nearestMarker.getPosition(), DEFAULT_ZOOM + 1));
+                Toast.makeText(this, "Văn phòng gần nhất: " + nearestOffice.getName(), Toast.LENGTH_LONG).show();
+            } else {
+                Log.w(TAG, "Nearest marker not found in HashMap for office: " + nearestOffice.getName());
+                // Fallback nếu không tìm thấy marker, vẫn có thể di chuyển camera
+                if (nearestOffice.getLatLng() != null) {
+                    mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(nearestOffice.getLatLng(), DEFAULT_ZOOM + 1));
+                    Toast.makeText(this, "Văn phòng gần nhất (không có marker): " + nearestOffice.getName(), Toast.LENGTH_LONG).show();
+                }
             }
         }
     }
+
+
+    // Bỏ các hàm lifecycle của MapView (onStart, onStop, etc.) vì SupportMapFragment tự quản lý
 }

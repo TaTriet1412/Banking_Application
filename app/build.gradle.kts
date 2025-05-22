@@ -1,11 +1,10 @@
-import java.io.FileInputStream
-import java.util.Properties
+import java.io.FileInputStream // Không cần thiết nữa nếu không dùng getMapboxAccessToken
+import java.util.Properties    // Không cần thiết nữa nếu không dùng getMapboxAccessToken
 
 plugins {
     alias(libs.plugins.android.application)
     id("com.google.gms.google-services")
 }
-
 
 android {
     namespace = "com.example.bankingapplication"
@@ -19,8 +18,8 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        // <<<<<< THÊM DÒNG NÀY ĐỂ ĐỊNH NGHĨA BIẾN TRONG BUILDCONFIG >>>>>>
-        buildConfigField("String", "DIRECTIONS_API_KEY", "\"${getApiKey("GOOGLE_DIRECTIONS_API_KEY")}\"")
+        // KHÔNG CẦN buildConfigField cho MAPBOX_PUBLIC_TOKEN nếu dùng strings.xml/secrets.xml
+        // KHÔNG CẦN buildConfigField cho MAPBOX_DOWNLOADS_TOKEN (Gradle tự dùng từ gradle.properties)
     }
 
     buildTypes {
@@ -32,9 +31,13 @@ android {
             )
         }
     }
-    buildFeatures {
-        buildConfig = true
-    }
+
+    // buildFeatures { buildConfig = true } // Vẫn giữ nếu bạn dùng BuildConfig cho việc khác
+    // Nếu bạn không dùng BuildConfig cho bất kỳ mục đích nào khác, có thể comment out dòng trên
+    // để tối ưu build time. Nhưng nếu bạn đã dùng nó cho HERE_ROUTING_API_KEY trước đó
+    // (mà giờ không dùng nữa) thì có thể bỏ hẳn nếu không còn buildConfigField nào khác.
+    // Hiện tại, cứ để buildConfig = true cũng không sao.
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
@@ -43,38 +46,17 @@ android {
     packagingOptions {
         resources.excludes.add("META-INF/*")
     }
-    buildFeatures {
-        buildConfig = true
-    }
+    // buildFeatures { buildConfig = true } // Đã có ở trên, không cần lặp lại
 }
-// <<<<<< THÊM HÀM NÀY Ở NGOÀI KHỐI android { ... } >>>>>>
-// Hàm để đọc key từ local.properties
-// Hàm getApiKey viết bằng Kotlin
-fun getApiKey(propertyName: String): String {
-    val properties = Properties()
-    val localPropertiesFile = rootProject.file("local.properties")
-    if (localPropertiesFile.exists()) {
-        try {
-            properties.load(FileInputStream(localPropertiesFile))
-            return properties.getProperty(propertyName, "")
-        } catch (e: Exception) {
-            println("Warning: Could not load local.properties file. ${e.message}")
-        }
-    } else {
-        println("Warning: local.properties file not found. API keys might not be loaded.")
-    }
-    return ""
-}
+
+
 dependencies {
     implementation("io.github.chaosleung:pinview:1.4.4")
-
     implementation(platform("com.google.firebase:firebase-bom:33.4.0"))
     implementation ("androidx.browser:browser:1.5.0")
-    // Thêm các phụ thuộc các dịch vụ cụ thể của Firebase
-    implementation("com.google.firebase:firebase-auth") // Firebase Authentication
-    implementation("com.google.firebase:firebase-storage") // Firebase Storage
-    implementation("com.google.firebase:firebase-firestore") // Firebase Firestore
-
+    implementation("com.google.firebase:firebase-auth")
+    implementation("com.google.firebase:firebase-storage")
+    implementation("com.google.firebase:firebase-firestore")
     implementation("com.google.firebase:firebase-appcheck-playintegrity")
     implementation("com.google.firebase:firebase-appcheck-debug")
     implementation ("com.github.bumptech.glide:glide:4.15.1")
@@ -84,12 +66,12 @@ dependencies {
     implementation ("com.squareup.okhttp3:okhttp:4.12.0")
     implementation("com.sun.mail:android-mail:1.6.7")
     implementation("com.sun.mail:android-activation:1.6.7")
-    implementation("com.google.android.gms:play-services-maps:18.2.0")
-    implementation("com.google.android.gms:play-services-location:21.2.0")
+    implementation("com.google.android.gms:play-services-location:21.2.0") // Giữ lại nếu dùng FusedLocationProviderClient
     implementation ("com.google.android.material:material:1.12.0")
-    implementation ("com.squareup.retrofit2:retrofit:2.9.0'")
-    implementation ("com.squareup.retrofit2:converter-gson:2.9.0")
-    implementation ("com.google.maps.android:android-maps-utils:2.3.0")
+    implementation("com.google.android.gms:play-services-maps:18.2.0") // Kiểm tra phiên bản mới nhất
+//    implementation("com.google.android.gms:play-services-places:18.2.0") // Kiểm tra phiên bản mới nhất
+
+
     implementation(libs.appcompat)
     implementation(libs.material)
     implementation(libs.activity)

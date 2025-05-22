@@ -75,7 +75,17 @@
         <activity
             android:name=".BankOfficerMainActivity"
             android:exported="false" />
-
+<!--        <meta-data-->
+<!--            android:name="com.mapbox.token"-->
+<!--            android:value="YOUR_MAPBOX_ACCESS_TOKEN" />-->
+<!--        &lt;!&ndash; Thêm meta-data cho HERE SDK &ndash;&gt;-->
+<!--        <meta-data-->
+<!--            android:name="com.here.sdk.access_key_id"-->
+<!--            android:value="noI57mqzRppTcatC_X6Ilw" />-->
+<!--        <meta-data-->
+<!--            android:name="com.here.sdk.access_key_secret"-->
+<!--            android:value="Wk94r29Rz-AVbWBQo2smnvuFCSGw2VjBvNDCDAi78BshCKMf6aMu5RSxCHFO48brDb_NNPlAU39MVAzX2jkH9Q" />-->
+        <!-- Giữ nguyên meta-data cho Google Maps API -->
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="AIzaSyA6hT7klVvK35tmjh3W9UKF8JMhCBWs-Co" />
